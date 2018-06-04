@@ -31,7 +31,7 @@ class FormDesign {
 			},
 			rows : [],
 			operationRow : {
-				align:'bottom', 
+				align:'bottom',
                 type : 'buttons',
 				selected : false,
 				/*按钮行配置*/
@@ -65,7 +65,7 @@ class FormDesign {
 		};
 	};
 	init () {
-		
+
 	};
 	destroyed() {
         this.form = null;
@@ -73,9 +73,17 @@ class FormDesign {
     addFormItemRow() {
 		let rows = this.form.rows;
 		let rowId = this.uuid();
+
+    let initState = {
+       render : true,
+			 hide : false,
+			 readonly : false
+		};
+
 		let row = {
 			rowId:rowId,
             type:'formitem',
+						state : {...initState},
 			rowConfig : {
 				gutter : 0,
 				rowHeight : 35,
@@ -96,6 +104,7 @@ class FormDesign {
 		    let columnId = this.uuid();
 			let column = {
 				 columnId : columnId,
+				 state : {...initState},
 				 selected : false,
 				 columnConfig : {
 					 showLabel : 1,
@@ -110,17 +119,17 @@ class FormDesign {
 						type : 'text'
 					 }
 				 }
-			}     
+			}
 			row.columns.push(column);
 			// this.form.elements[columnId] = column;
 		}
 
         return row;
 	};
-    
+
 	/**交换索引*/
     exchangeRowIndex () {
-	   
+
 	};
 
     /**获取表单数据*/
@@ -154,7 +163,3 @@ class FormDesign {
 
 // 导出类
 export default FormDesign;
-
-
-
-

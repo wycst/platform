@@ -18,7 +18,7 @@
 </style>
 <template>
     <div class='state-row' :style1='{height:cssHeight}'>
-        
+
 	<Form :model="rowObject.state">
 		<Row class='item-row' :class="{'ivu-tree-title-selected' : rowObject.selected}">
 		    <Col span='2' style='text-align : left;'>
@@ -50,7 +50,9 @@
 			    </span>
 			</Col>
 			<Col span='7' style='text-align : left'>
+           <span style="padding-left:15px;">
 			    {{column.columnConfig.label || '列' + index}}
+           </span>
 			</Col>
 			<Col span='5'>
 			    <Checkbox v-model='column.state.render'/>

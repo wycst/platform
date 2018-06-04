@@ -248,7 +248,7 @@ export default {
     },
     computed: {
         formState() {
-            return this.$store.state.form.selection.selectState;
+            return this.$store.state.form.selection.selectStateId;
         },
         current() {
                 return this.$store.state.form.selection.selectType;
@@ -364,7 +364,7 @@ export default {
 			this.setButton(button);
 		    }
 		} else {
-		} 
+		}
 	    },
             deep: false
         }

@@ -1,0 +1,96 @@
+<template>
+    <div style="height: 100%;width: 100%;background: rgb(73, 80, 96);">
+            <div slot="top" class="logo-con">
+		 <img v-show="!shrink"  src="@/views/images/logo.jpg" key="max-logo" />
+		 <img v-show="shrink" src="@/views/images/logo-min.jpg" key="min-logo" />
+	    </div>
+	    <Menu v-show="!shrink" ref="sideMenu" theme="dark" :active-name="$route.name" :open-names="openNames"  width="auto" @on-select="changeMenu">
+		<template v-for="item in menuList">
+		    <MenuItem v-if="item.children.length<=1" :name="item.children[0].name" :key="'menuitem' + item.name">
+			<Icon :type="item.children[0].icon || item.icon" :size="iconSize" :key="'menuicon' + item.name"></Icon>
+			<span class="layout-text" :key="'title' + item.name">{{ itemTitle(item.children[0]) }}</span>
+		    </MenuItem>
+		    <Submenu v-if="item.children.length > 1" :name="item.name" :key="item.name">
+			<template slot="title">
+			    <Icon :type="item.icon" :size="iconSize"></Icon>
+			    <span class="layout-text">{{ itemTitle(item) }}</span>
+			</template>
+			<template v-for="child in item.children">
+			    <MenuItem :name="child.name" :key="'menuitem' + child.name">
+				<Icon :type="child.icon" :size="iconSize" :key="'icon' + child.name"></Icon>
+				<span class="layout-text" :key="'title' + child.name">{{ itemTitle(child) }}</span>
+			    </MenuItem>
+			</template>
+		    </Submenu>
+		</template>
+	    </Menu>
+
+            <div v-show="shrink">
+		<template v-for="(item, index) in menuList">
+		    <div style="text-align: center;" :key="index">
+			<Dropdown transfer v-if="item.children.length !== 1" placement="right-start" :key="index" @on-click="changeMenu">
+			    <Button style="width: 70px;margin-left: -5px;padding:10px 0;" type="text">
+				<Icon :size="20" :color="iconColor" :type="item.icon"></Icon>
+			    </Button>
+			    <DropdownMenu style="width: 200px;" slot="list">
+				<template v-for="(child, i) in item.children">
+				    <DropdownItem :name="child.name" :key="i"><Icon :type="child.icon"></Icon><span style="padding-left:10px;">{{ itemTitle(child) }}</span></DropdownItem>
+				</template>
+			    </DropdownMenu>
+			</Dropdown>
+			<Dropdown transfer v-else placement="right-start" :key="index" @on-click="changeMenu">
+			    <Button @click="changeMenu(item.children[0].name)" style="width: 70px;margin-left: -5px;padding:10px 0;" type="text">
+				<Icon :size="20" :color="iconColor" :type="item.children[0].icon || item.icon"></Icon>
+			    </Button>
+			    <DropdownMenu style="width: 200px;" slot="list">
+				<DropdownItem :name="item.children[0].name" :key="'d' + index"><Icon :type="item.children[0].icon || item.icon"></Icon><span style="padding-left:10px;">{{ itemTitle(item.children[0]) }}</span></DropdownItem>
+			    </DropdownMenu>
+			</Dropdown>
+		    </div>
+		</template>
+	    </div>
+
+    </div>
+     
+
+</template>
+
+<script>
+export default {
+    name: 'sidebarMenu',
+    props: {
+        shrink:Boolean,
+        menuList: Array,
+        iconSize: Number,
+        openNames: {
+            type: Array
+        }
+    },
+    data () {
+        return {
+	    iconColor : 'white',
+            menuTheme : 'darck'
+	}
+    },
+    methods: {
+        changeMenu (active) {
+            this.$emit('on-change', active);
+        },
+        itemTitle (item) {
+            if (typeof item.title === 'object') {
+                return this.$t(item.title.i18n);
+            } else {
+                return item.title;
+            }
+        }
+    },
+    updated () {
+        this.$nextTick(() => {
+            if (this.$refs.sideMenu) {
+                this.$refs.sideMenu.updateOpened();
+            }
+        });
+    }
+    
+};
+</script>

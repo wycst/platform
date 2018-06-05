@@ -4,7 +4,7 @@
 
 <Accordion fit>
     <AccordionPanel title='表单目录' active>
-        <Tree :data="data1"></Tree>
+        <ModelTree titleKey='name' dataType='raw' :url='formTreeDataUrl'></ModelTree>
     </AccordionPanel>
     <AccordionPanel title='状态列表'>
         <ButtonGroup style='margin-bottom:5px;'>
@@ -56,16 +56,22 @@ export default {
     },
     computed: {
         selectNode() {
-	    if (this.i && this.$refs.modelTree) {
-		return this.$refs.modelTree.getSelectedNodes();
-	    }
-	    return null;
+	          if (this.i && this.$refs.modelTree) {
+  		          return this.$refs.modelTree.getSelectedNodes();
+    	      }
+    	      return null;
         },
-	stateList() {
-	    return this.$store.state.form.stateList;
-	}
+      	stateList() {
+      	    return this.$store.state.form.stateList;
+      	},
+        formTreeDataUrl() {
+            return this.$store.state.form.contextPath + this.$store.state.form.url.loadFormTree ;
+        }
     },
     methods: {
+        afterTreeRender() {
+            this.$store.commit('loadFormTree');
+        },
         addState() {
 	    let me = this;
 	    let newState = this.$store.state.form.newState;

@@ -24,38 +24,40 @@ const form = {
     state: {
         contextPath : 'http://localhost:3000',
         url : {
-		   query            : '/form/datagrid',
-		   save             : '/form/saveForm',
-		   addState         : '/form/addState',
-		   loadState        : '/form/loadState',
-		   saveState        : '/form/saveState',
-		   queryById        : '/form/loadForm',
-		   disableForm  : '/form/disable',
-		   publishForm  : '/form/publish',
-		   deleteForm   : '/form/delete'
-		},
-		vm : null,
-		loading : false,
-		totalCount : 0,
-		regions : {
-			west : {
-					title : '导航',
-					width : 250,
-					component : FormMenu
+					   query            : '/form/datagrid',
+						 loadFormTree     : '/form/formTree',
+					   save             : '/form/saveForm',
+					   addState         : '/form/addState',
+					   loadState        : '/form/loadState',
+					   saveState        : '/form/saveState',
+					   queryById        : '/form/loadForm',
+					   disableForm  : '/form/disable',
+					   publishForm  : '/form/publish',
+					   deleteForm   : '/form/delete'
 				},
-				east : {
-					title : '设置',
-					collapsed : true,
-					width : 350,
-					component : FormSetting
-				},
-				center : {
-					title : '设计',
-					component : FormEdit
-				}
+				vm : null,
+				loading : false,
+				totalCount : 0,
+				regions : {
+						west : {
+							title : '导航',
+							width : 250,
+							component : FormMenu
+						},
+						east : {
+							title : '设置',
+							collapsed : true,
+							width : 350,
+							component : FormSetting
+						},
+						center : {
+							title : '设计',
+							component : FormEdit
+						}
 			},
+		formTreeNodeList : [],
 		form : {},
-        form_uid : null,
+    form_uid : null,
 
 		stateList : [],
 		newState : {
@@ -76,8 +78,13 @@ const form = {
     mutations: {
         initForm(state,form) {
             state.form = form;
-		},
-		// 合并state到form对象
+				},
+				loadFormTree(state) {
+						axios.get(state.contextPath + state.url.loadFormTree).then(res => {
+							    state.formTreeNodeList = res.data;
+						});
+				},
+				// 合并state到form对象
         mergeState(state,type) {
             let form = state.form;
             let formState = state.formState;
@@ -128,7 +135,7 @@ const form = {
             let stateSourceJson = JSON.parse(JSON.stringify(initState));
 			Object.assign(stateSourceJson.baseProps,state.newState);
             params.state_source = JSON.stringify(stateSourceJson,0,4);
-         
+
             console.log(JSON.stringify(initState));
 
             axios.post(state.contextPath + state.url.addState,
@@ -168,7 +175,7 @@ const form = {
 	    saveState(state) {
 			let formState = state.formState;
 			let queryParams = Object.assign({},formState.baseProps);
-           
+
 			queryParams.id = state.selection.selectStateId;
             // 每次保存根据编辑的结果初始化store的状态信息
             formState.elementsState = {};
@@ -225,7 +232,7 @@ const form = {
 					let formState = JSON.parse(stateSource);
                     Object.assign(state.formState,formState);
 				} else {
-				
+
 					Object.assign(state.formState,formState);
 				}
 				this.commit('mergeState');

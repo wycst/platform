@@ -58,7 +58,7 @@ const form = {
         }
     },
     selection : {
-        selectState : null,
+        selectStateId : null,
         selectType : 1,
         selectRow  : null,
   			selectButton  : null,
@@ -81,7 +81,7 @@ const form = {
                      if(!columnState) {
 					     columnState = JSON.parse(JSON.stringify(formState.stateOption));
 					     formState.elementsState[column.columnId] = columnState;
-					 } 
+					 }
 					 Vue.set(column,'state',columnState);
 				 });
 
@@ -89,15 +89,14 @@ const form = {
 				 if(!rowState) {
 					 rowState = JSON.parse(JSON.stringify(formState.stateOption));
 					 formState.elementsState[row.rowId] = rowState;
-				 } 
+				 }
 				 Vue.set(row,'state',rowState);
 			});
         },
 		// 清除form对象中的state信息
 		clearState(state) {
-            console.log(JSON.stringify(state.formState,0,4));
             let form = state.form;
-			delete form.state;
+			      delete form.state;
             form.rows.forEach( row => {
                  row.columns.forEach(column => {
 				     delete column.state;
@@ -114,9 +113,43 @@ const form = {
             if(id) {
 			           queryParams.id = id;
             }
-    			  queryParams.formSource = JSON.stringify(state.form,0,4);
+
+            //
+            let stateId = state.selection.selectStateId;
+            if(stateId) {
+                queryParams.stateId = stateId;
+                 //
+                let formState = state.formState;
+                queryParams.stateName = formState.baseProps.name;
+                queryParams.stateCode = formState.baseProps.code;
+                queryParams.stateDescription = formState.baseProps.description;
+
+                formState.elementsState = {};
+                let initState = {
+                   render : true,
+                   hide : false,
+                   readonly : false
+                };
+                state.form.rows.forEach( row => {
+                     row.columns.forEach(column => {
+    					           formState.elementsState[column.columnId] = column.state;
+                         column.state = {...initState};
+                         column.selected = false;
+                     });
+                     formState.elementsState[row.rowId] = row.state;
+                     row.state = {...initState};
+                     row.selected = false;
+    					  });
+                queryParams.stateSource = JSON.stringify(formState,0,4);
+             }
+
+                queryParams.formSource = JSON.stringify(state.form,0,4);
+
                 axios.post(state.contextPath + state.url.save,qs.stringify(queryParams)).then(res => {
     			      alert('sucess');
+
+
+
     		    }).catch(function(error) {
     			      alert(error);
     			  });

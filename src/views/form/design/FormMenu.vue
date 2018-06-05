@@ -70,17 +70,16 @@ export default {
     methods: {
         unSelectState() {
             this.$store.commit('setSelection',{
-                 selectState : null
+                 selectStateId : null
             });
-	    this.$store.commit('clearState');
+	          this.$store.commit('clearState');
         },
-        selectState() {
-            // load state by id,then commit store
+        selectState(name) {
+            // load state by name，then commit store
             this.$store.commit('setSelection',{
-                 selectState : {
-		 }
+                 selectStateId : name
             });
-	    this.$store.commit('mergeState');
+	          this.$store.commit('mergeState');
         },
         titleRender(source, index) {
             if (source) {

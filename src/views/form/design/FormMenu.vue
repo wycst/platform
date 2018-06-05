@@ -8,24 +8,19 @@
     </AccordionPanel>
     <AccordionPanel title='状态列表'>
         <ButtonGroup style='margin-bottom:5px;'>
-            <Button type="ghost">添加</Button>
+            <Button type="ghost" @click='addState'>添加</Button>
             <Button type="ghost">删除</Button>
-            <Button type="ghost" @click='unSelectState'>取消选中</Button>
+            <Button type="ghost" @click='unselectState'>取消选中</Button>
         </ButtonGroup>
         <Menu @on-select='selectState' width='auto'>
-               <MenuItem name="3">
-                   <Icon type="heart"></Icon>
-                   拟稿
-               </MenuItem>
-               <MenuItem name="4">
-                   <Icon type="heart-broken"></Icon>
-                   审批
-               </MenuItem>
-               <MenuItem name="4">
-                   <Icon type="heart-broken"></Icon>
-                   归档
-               </MenuItem>
+	       <template v-for='state in stateList'>
+	           <MenuItem :name="state.id">
+			<Icon type="heart1"></Icon>
+			<span>{{state.name}}</span>
+		   </MenuItem>
+	       </template>
         </Menu>
+
     </AccordionPanel>
     <AccordionPanel title='表单模型树'>
         <ModelTree :titleRender='titleRender' @on-node-click='clickNode' @on-select-change='selectChange' childrenKey='columns' :model='this.$store.state.form.form.rows'></ModelTree>
@@ -37,10 +32,11 @@
 <script>
 
 import ModelTree from '@/components/tree/ModelTree'
-
+import AddState from '../state/AddState'
 export default {
     components: {
-        ModelTree
+        ModelTree,
+	AddState
     },
     data() {
         return {
@@ -60,26 +56,50 @@ export default {
     },
     computed: {
         selectNode() {
-                if (this.i && this.$refs.modelTree) {
-                    return this.$refs.modelTree.getSelectedNodes();
-                }
-                return null;
-        }
-
+	    if (this.i && this.$refs.modelTree) {
+		return this.$refs.modelTree.getSelectedNodes();
+	    }
+	    return null;
+        },
+	stateList() {
+	    return this.$store.state.form.stateList;
+	}
     },
     methods: {
-        unSelectState() {
+        addState() {
+	    let me = this;
+	    let newState = this.$store.state.form.newState;
+            this.$Modal.confirm({
+	            title : '添加状态',
+		    closable : true,
+                    render: (h) => {
+                        return h(AddState,{
+			    props : {
+			       stateInfo:newState
+			    }
+			},null);
+                    },
+		    onOk() {
+		        // save current form state
+			me.$store.commit('addState');
+		    },
+		    onCancel() {
+		        // canel
+		    }
+                });
+	},
+        unselectState() {
             this.$store.commit('setSelection',{
                  selectStateId : null
             });
-	          this.$store.commit('clearState');
+	    this.$store.commit('clearState');
         },
         selectState(name) {
             // load state by name，then commit store
-            this.$store.commit('setSelection',{
+	    this.$store.commit('setSelection',{
                  selectStateId : name
             });
-	          this.$store.commit('mergeState');
+            this.$store.commit('loadState',name);
         },
         titleRender(source, index) {
             if (source) {

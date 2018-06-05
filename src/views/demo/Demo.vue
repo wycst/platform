@@ -6,6 +6,7 @@
      </p>   
      <p slot='extra'>
 
+         <Button @click='testModel'>测试弹出框</Button>
 
          <Button>
              <Input v-model='height'>
@@ -129,6 +130,24 @@ export default {
 	methods : {
 	   toggle(i) {
 	      this.active = i == this.active ? -1 : i;
+	   },
+           testModel() {
+	       this.$Modal.confirm({
+                    render: (h) => {
+                        return h('Input', {
+                            props: {
+                                value: this.value,
+                                autofocus: true,
+                                placeholder: 'Please enter your name...'
+                            },
+                            on: {
+                                input: (val) => {
+                                    this.value = val;
+                                }
+                            }
+                        })
+                    }
+                });
 	   }
 	}
 }

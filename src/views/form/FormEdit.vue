@@ -81,7 +81,7 @@
 }
 
 .item-mask {
-    z-index: 99999;
+    z-index: 100;
     background: #FFF;
     height: 100%;
     opacity: 0.1;

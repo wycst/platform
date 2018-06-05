@@ -119,6 +119,6 @@
 </script>
 <style>
 body .ivu-modal .ivu-select-dropdown{
-  position: fixed !important;
+ // position: fixed !important;
 }
 </style>

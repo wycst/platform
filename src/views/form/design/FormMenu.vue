@@ -4,7 +4,7 @@
 
 <Accordion fit>
     <AccordionPanel title='表单目录' active>
-        <ModelTree titleKey='name' dataType='raw' :url='formTreeDataUrl'></ModelTree>
+        <ModelTree ref='formTree' titleKey='name' dataType='raw' :url='formTreeDataUrl' @on-load='afterTreeLoad' @on-node-click='selectForm'></ModelTree>
     </AccordionPanel>
     <AccordionPanel title='状态列表'>
         <ButtonGroup style='margin-bottom:5px;'>
@@ -69,9 +69,21 @@ export default {
         }
     },
     methods: {
-        afterTreeRender() {
-            this.$store.commit('loadFormTree');
+        afterTreeLoad(tree) {
+	    let formId = this.$route.query.id;
+            tree.select(formId);
         },
+	selectForm(node) {
+	    if(node && node.type == 'node') {
+	       let formId = this.$route.query.id;
+	       if(formId != node.id) {
+	           // 刷新页面的数据
+		   // 方法1 直接刷新页面
+		   // 方法2 根据id通过ajax加载数据
+	           this.$router.push('/formdesign?t=1&id=' + node.id);
+	       }
+	    }
+	},
         addState() {
 	    let me = this;
 	    let newState = this.$store.state.form.newState;

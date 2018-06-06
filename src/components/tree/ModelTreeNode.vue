@@ -19,7 +19,7 @@
     </span>
     <ul v-show='children && expand' class="ivu-tree-children">
         <template v-for='(child,i) in children'>
-            <ModelTreeNode @on-expand='expandNode' :parentData='data' :nodeIndex='i' :titleRender='titleRender' :titleKey='titleKey' :childrenKey='childrenKey' :data='child'></ModelTreeNode>
+            <ModelTreeNode :modelId='modelId' @on-expand='expandNode' :parentData='data' :nodeIndex='i' :titleRender='titleRender' :titleKey='titleKey' :childrenKey='childrenKey' :data='child'></ModelTreeNode>
         </template>
     </ul>
 </li>
@@ -27,11 +27,12 @@
 </template>
 
 <script>
-import Emitter from 'iview/src/mixins/emitter';
+import emit from '@/components/mixins/emit';
 export default {
     name: 'ModelTreeNode',
-    mixins: [ Emitter ],
+    mixins: [ emit ],
     props: {
+        modelId : [String,Number],
         parentData : Object,
         nodeIndex: Number,
         titleRender: Function,
@@ -58,6 +59,8 @@ export default {
         }
     },
     mounted() {
+        // 选择事件
+        this.$eventTarget.$on(this.modelId + '-on-select',this.handleSelect);
     },
     computed: {
         cssHeight() {
@@ -91,7 +94,14 @@ export default {
         expandNode() {
             this.expand = true;
             this.$emit('on-expand');
-        }
+        },
+	handleSelect(id,selectedNodes) {
+	    console.log('=====123========');
+	    if(this.data.id == id) {
+	        this.data['selected'] = 'selected';
+		selectedNodes.push(this.data);
+	    }
+	}
     },
     beforeDestroy: function() {
         this.$off('on-expand',this.expand);

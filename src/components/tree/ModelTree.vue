@@ -6,7 +6,7 @@
 <div class="ivu-tree">
     <ul class="ivu-tree-children" visible="visible">
         <template v-for='(child,index) in data'>
-            <ModelTreeNode :nodeIndex='index' :titleRender='titleRender' :titleKey='titleKey' :childrenKey='childrenKey' :data='child'></ModelTreeNode>
+            <ModelTreeNode :modelId='modelId' :nodeIndex='index' :titleRender='titleRender' :titleKey='titleKey' :childrenKey='childrenKey' :data='child'></ModelTreeNode>
         </template>
     </ul>
     <!---->
@@ -44,11 +44,11 @@ export default {
     data() {
         return {
             data : [],
+	    modelId : this._uid,
             selectedNodes : []
         }
     },
     mounted() {
-
         if(this.model) {
              this.data.push(...this.model);
         } else if(this.url) {
@@ -75,18 +75,30 @@ export default {
                   } else {
                       this.data.push(...res.data);
                   }
+		  this.$emit('on-load',this,this.data);
              });
         } 
-        this.$on('clickNode',this.clickNode);
-        this.$emit('on-render');
-    },
-    mounted1() {
+	// child后代组件继承emitter后直接dispatch会触发
         this.$on('clickNode',this.clickNode);
         this.$emit('on-render');
     },
     computed: {
     },
     methods: {
+        select(select) {
+	   this.clearSelectedNodes();
+	   if(typeof select == 'object') {
+               this.selectedNodes.push(select);
+	   } else {
+	       // how to get the selected by id
+	       if(select) {
+	           let id = select;
+		   setTimeout(()=> {
+		       this.$eventTarget.$emit(this.modelId + '-on-select',id,this.selectedNodes);
+		   },0);
+	       }
+	   }
+	},
         clearSelectedNodes() {
            this.selectedNodes.forEach(node =>{
                node.selected = false;

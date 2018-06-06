@@ -5,6 +5,7 @@ var mysql = require('mysql');
 var $sql = require('./sql');
 var uuid = require('node-uuid');
 
+// 连接池
 var pool = mysql.createPool(models.mysql);
 
 // 连接数据库
@@ -29,7 +30,7 @@ var jsonWrite = function(res, ret) {
     }
 };
 
-// 增加表单接口
+// 加载表单树
 router.get('/formTree', (req, res) => {
     var params = req.body;
 	  var id = params.id;
@@ -62,7 +63,7 @@ router.get('/formTree', (req, res) => {
 
 
 
-// 增加表单接口
+// 保存表单接口
 router.post('/saveForm', (req, res) => {
     var params = req.body;
 	var id = params.id;
@@ -108,7 +109,7 @@ router.post('/saveForm', (req, res) => {
 
 });
 
-// 增加用户接口
+// 加载表单接口
 router.get('/loadForm', (req, res) => {
       var params = req.query;
 	  var id = params.id;
@@ -173,7 +174,7 @@ router.post('/addState', (req, res) => {
 
 });
 
-// 加载接口
+// 加载状态接口
 router.get('/loadState', (req, res) => {
     var params = req.query;
 	var id = params.id;
@@ -203,7 +204,7 @@ router.get('/loadState', (req, res) => {
 
 });
 
-// 加载接口
+// 保存状态接口
 router.post('/saveState', (req, res) => {
     var params = req.body;
 	var id = params.id;

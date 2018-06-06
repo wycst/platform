@@ -78,13 +78,8 @@ const form = {
     mutations: {
         initForm(state,form) {
             state.form = form;
-				},
-				loadFormTree(state) {
-						axios.get(state.contextPath + state.url.loadFormTree).then(res => {
-							    state.formTreeNodeList = res.data;
-						});
-				},
-				// 合并state到form对象
+		},
+		// 合并state到form对象
         mergeState(state,type) {
             let form = state.form;
             let formState = state.formState;

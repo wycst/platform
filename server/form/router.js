@@ -30,6 +30,39 @@ var jsonWrite = function(res, ret) {
 };
 
 // 增加表单接口
+router.get('/formTree', (req, res) => {
+    var params = req.body;
+	  var id = params.id;
+    var dirSql = "select uid as id,name,parent_uid as pid,'dir' as type from form_dir_info dir where 1 = 1 ";
+	  var formSql = "select f.id,f.name,f.dir_uid as pid,'node' as type  from form_info f";
+    let list = [];
+    pool.getConnection(function(err,conn) {
+        if(err) {
+                console.log(' get connect error ');
+        } else {
+            conn.query(dirSql, [], function(err, result) {
+                if (err) {
+                    console.log(err);
+                }
+                list.push(...result);
+                conn.query(formSql, [], function(e, forms) {
+                    if (e) {
+                        console.log(e);
+                    }
+                    list.push(...forms);
+                    jsonWrite(res, list);
+                    conn.release();
+                });
+            });
+        }
+    });
+
+
+});
+
+
+
+// 增加表单接口
 router.post('/saveForm', (req, res) => {
     var params = req.body;
 	var id = params.id;
@@ -100,7 +133,7 @@ router.get('/loadForm', (req, res) => {
                       jsonWrite(res, result);
 					  conn.release();
 				  });
-                  
+
               });
           }
       });
@@ -146,7 +179,7 @@ router.get('/loadState', (req, res) => {
 	var id = params.id;
     var sql = $sql.state.select;
 	var sqlParams = [];
-	
+
     console.log(' sql : ' + sql);
 	console.log(' params : ' + [id]);
 
@@ -176,7 +209,7 @@ router.post('/saveState', (req, res) => {
 	var id = params.id;
     var sql = $sql.state.update;
 	var sqlParams = [];
-	
+
 	sqlParams.push(...[
     		   	  params.name,
                   params.code,

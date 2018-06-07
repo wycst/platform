@@ -44,6 +44,7 @@ export default {
     data() {
         return {
             data : [],
+	    remote : false,
 	    modelId : this._uid,
             selectedNodes : []
         }
@@ -52,31 +53,8 @@ export default {
         if(this.model) {
              this.data.push(...this.model);
         } else if(this.url) {
-             axios.get(this.url).then(res => {
-                  if(this.dataType == 'raw') {
-                      let rawData = res.data;
-                      let nodeMap = {};
-                      rawData.forEach(item => {
-                          let id = item.id;
-                          nodeMap[id] = item;
-                      });
-                      let nodeList = [];
-                      rawData.forEach(item => {
-                          let pid = item.pid;
-                          if(nodeMap[pid]) {
-                              let pnode = nodeMap[pid];
-                              pnode[this.childrenKey] = pnode[this.childrenKey] || [];
-                              pnode[this.childrenKey].push(item);
-                          } else {
-                              nodeList.push(item);
-                          }
-                      });
-                      this.data.push(...nodeList);
-                  } else {
-                      this.data.push(...res.data);
-                  }
-		  this.$emit('on-load',this,this.data);
-             });
+	     this.remote = true;
+             this.load();
         } 
 	// child后代组件继承emitter后直接dispatch会触发
         this.$on('clickNode',this.clickNode);
@@ -85,6 +63,39 @@ export default {
     computed: {
     },
     methods: {
+        load() {
+	   if(this.url && this.remote) {
+	       this.data.splice(0,this.data.length);
+	       axios.get(this.url).then(res => {
+		  if(this.dataType == 'raw') {
+		      let rawData = res.data;
+		      let nodeMap = {};
+		      rawData.forEach(item => {
+			  let id = item.id;
+			  nodeMap[id] = item;
+		      });
+		      let nodeList = [];
+		      rawData.forEach(item => {
+			  let pid = item.pid;
+			  if(nodeMap[pid]) {
+			      let pnode = nodeMap[pid];
+			      pnode[this.childrenKey] = pnode[this.childrenKey] || [];
+			      pnode[this.childrenKey].push(item);
+			  } else {
+			      nodeList.push(item);
+			  }
+		      });
+		      this.data.push(...nodeList);
+		  } else {
+		      this.data.push(...res.data);
+		  }
+		  this.$emit('on-load',this,this.data);
+	     });
+	   }
+	},
+	reload() {
+	   this.load();
+	},
         select(select) {
 	   this.clearSelectedNodes();
 	   if(typeof select == 'object') {

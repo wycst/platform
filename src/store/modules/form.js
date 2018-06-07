@@ -57,8 +57,8 @@ const form = {
 			},
 		formTreeNodeList : [],
 		form : {},
-    form_uid : null,
-
+        form_uid : null,
+		showStateList : false,
 		stateList : [],
 		newState : {
 			name : null,
@@ -68,7 +68,7 @@ const form = {
 		formState : JSON.parse(JSON.stringify(initState)),
 		selection : {
 			selectStateId : null,
-			selectType : 1,
+			selectType : null,
 			selectRow  : null,
 			selectButton  : null,
 			selectColumn : null
@@ -76,7 +76,19 @@ const form = {
 		rows : []
     },
     mutations: {
-        initForm(state,form) {
+		initForm(state,initForm) {
+			state.form = initForm;
+            state.showStateList = false;
+            state.stateList.splice(0,state.stateList.length);
+			Object.assign(state.selection,{
+				selectStateId : null,
+				selectType : null,
+				selectRow  : null,
+				selectButton  : null,
+				selectColumn : null
+			});
+		},
+        setCurrentForm(state,form) {
             state.form = form;
 		},
 		// 合并state到form对象
@@ -131,8 +143,6 @@ const form = {
 			Object.assign(stateSourceJson.baseProps,state.newState);
             params.state_source = JSON.stringify(stateSourceJson,0,4);
 
-            console.log(JSON.stringify(initState));
-
             axios.post(state.contextPath + state.url.addState,
 				 qs.stringify(params)).then(res => {
     			      alert('sucess');
@@ -145,29 +155,31 @@ const form = {
     			      alert(error);
     			 });
 		},
-        saveForm(state,id) {
+        saveForm(state,option) {
             let queryParams = Object.assign({},state.form.baseProps);
-            if(id) {
+            let id = option.id;
+			if(id) {
 			    queryParams.id = id;
+				 // 保存状态信息
+				let stateId = state.selection.selectStateId;
+				if(stateId) {
+				   this.commit('saveState',option);
+				   return ;
+				}
             }
-            // 保存状态信息
-            let stateId = state.selection.selectStateId;
-            if(stateId) {
-			   console.log(' to saveState ');
-			   this.commit('saveState');
-               return ;
-            }
-
             queryParams.formSource = JSON.stringify(state.form,0,4);
 
             axios.post(state.contextPath + state.url.save,
 				 qs.stringify(queryParams)).then(res => {
     			      alert('sucess');
+					  if(option.callback) {
+					      option.callback.call(this,1);
+					  }
     		     }).catch(function(error) {
     			      alert(error);
     			 });
 		},
-	    saveState(state) {
+	    saveState(state,option) {
 			let formState = state.formState;
 			let queryParams = Object.assign({},formState.baseProps);
 
@@ -183,7 +195,10 @@ const form = {
             queryParams.stateSource = JSON.stringify(formState,0,4);
             axios.post(state.contextPath + state.url.saveState,
 				 qs.stringify(queryParams)).then(res => {
-    			      alert('sucess');
+    			      if(option && option.callback) {
+						  option.callback.call(this,2);
+					  }
+					  alert('sucess');
     		     }).catch(function(error) {
     			      alert(error);
     			 });
@@ -254,6 +269,8 @@ const form = {
 						state.stateList.push(...res.data[0].stateList);
 					}
 				    option.callback.call(this,res.data);
+					// show statelist
+					state.showStateList = true;
 				}
 		    }).catch(function(error) {
                 console.trace(error);

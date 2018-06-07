@@ -1,7 +1,7 @@
 <template>
 <Card ref="mainCard">
      <p slot="title">
-        <Icon type="ios-flower"></Icon>
+        <Icon :type="$route.query.id ? 'edit' : 'plus'"></Icon>
 	{{title}}
      </p>
      <p slot="extra">
@@ -34,17 +34,19 @@ export default {
 	data () {
 		 return {
 		    offsetTop : 0,
+		    initForm : null,
 		    design : null
 		 }
 	},
 	created () {
            // let id = this.$route.query
 	   this.design = new FormDesign();
+	   this.initForm = this.design.form;
+	   let id = this.$route.query.id;
 	   this.$store.commit('initForm',this.design.form);
-     let id = this.$route.query.id;
 	   if(id) {
-          this.loadForm(id);
-	   }
+	       this.loadForm(id);
+	   } 
 	},
 	destroyed() {
            this.design.destroyed();
@@ -66,23 +68,34 @@ export default {
 	   }
 	},
 	methods : {
-     loadForm(id) {
-          // 查询表单数据
-          this.$store.commit("loadForm",{
-              id : id,
-              callback : (data)=> {
-                    if(!data || data.length == 0) {
-                         alert('不存在的表单');
-                    } else {
-                         let form = JSON.parse(data[0].form_source);
-                         this.design.form = form;
-                         this.$store.commit('initForm',form);
-                    }
-              }
-           });
-     },
+	     loadForm(id) {
+		  // 查询表单数据
+		  this.$store.commit("loadForm",{
+		      id : id,
+		      callback : (data)=> {
+			    if(!data || data.length == 0) {
+				 alert('不存在的表单');
+			    } else {
+				 let form = JSON.parse(data[0].form_source);
+				 this.design.form = form;
+				 this.$store.commit('setCurrentForm',form);
+			    }
+		      }
+		   });
+	     },
 	   save() {
-	       this.$store.commit('saveForm',this.$route.query.id);
+	       let me = this;
+	       this.$store.commit('saveForm',{
+	           id : this.$route.query.id,
+		   callback(type) {
+		       // 重新加载tree或state
+		       if(type == 1) {
+		           me.$eventTarget.$emit('on-refresh-formtree');
+		       } 
+		       // 重新加载form
+		       me.loadForm(me.$route.query.id);
+		   }
+	       });
 	   },
 	   showJson() {
 	       console.log(JSON.stringify(this.design.form,0,4));
@@ -107,10 +120,14 @@ export default {
 	   }
 	},
 	watch : {
-      '$route.query.id'(id) {
-          console.log('========== ' + id);
-          this.loadForm(id);
-      }
+	      '$route.query.id'(id) {
+		  if(id) {
+		      this.loadForm(id);
+		  } else {
+		     // this.design.form = JSON.parse(JSON.stringify(this.initForm));
+		     // this.$store.commit('setCurrentForm',this.design.form);
+		  }
+	      }
   }
 }
 

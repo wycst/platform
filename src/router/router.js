@@ -108,8 +108,7 @@ export const appRouter = [
         name: 'other',
         component: Main,
         children: [
-			{ path: 'index', title: '错误页面',icon : 'ios-play', name: 'errorpage_index', component: () => import('@/views/error-page/error-page.vue') },
-            { path: 'borderlayout', title: '边界布局',icon : 'ios-play', name: 'borderlayout', component: () => import('@/views/form/FormDesign.vue') },
+            { path: 'formdesign', title: '表单设计',icon : 'ios-play', name: 'form-design', component: () => import('@/views/form/FormDesign.vue') },
             { path: 'index2', title: '错误页面2',icon : 'ios-play', name: 'errorpage_index2', component: () => import('@/views/error-page/error-page.vue') },
 			{ path: 'index12', title: '错误页面12',icon : 'ios-play', name: 'errorpage_index12', component: () => import('@/views/error-page/error-page.vue') }
 		]

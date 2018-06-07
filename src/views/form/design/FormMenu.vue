@@ -6,7 +6,7 @@
     <AccordionPanel title='表单目录' active>
         <ModelTree ref='formTree' titleKey='name' dataType='raw' :url='formTreeDataUrl' @on-load='afterTreeLoad' @on-node-click='selectForm'></ModelTree>
     </AccordionPanel>
-    <AccordionPanel title='状态列表'>
+    <AccordionPanel title='状态列表' :hide='!showStateList'>
         <ButtonGroup style='margin-bottom:5px;'>
             <Button type="ghost" @click='addState'>添加</Button>
             <Button type="ghost">删除</Button>
@@ -20,7 +20,6 @@
                 </MenuItem>
             </template>
         </Menu>
-
     </AccordionPanel>
     <AccordionPanel title='表单模型树'>
         <ModelTree :titleRender='titleRender' @on-node-click='clickNode' @on-select-change='selectChange' childrenKey='columns' :model='this.$store.state.form.form.rows'></ModelTree>
@@ -62,6 +61,9 @@ export default {
                 }
                 return null;
             },
+	    showStateList() {
+	        return this.$store.state.form.showStateList;
+	    },
             stateList() {
                 return this.$store.state.form.stateList;
             },
@@ -70,11 +72,19 @@ export default {
             }
     },
     updated() {
-        this.$nextTick(()=> {
-            this.$refs.stateMenu.updateActiveName(null);
-        });
+        if(this.$refs.stateMenu) {
+	    this.$nextTick(()=> {
+		this.$refs.stateMenu.updateActiveName(null);
+	    });
+	}
+    },
+    mounted() {
+        this.$eventTarget.$on('on-refresh-formtree',this.refreshFormtree);  
     },
     methods: {
+            refreshFormtree() {
+	        this.$refs.formTree.reload();
+	    },
             afterTreeLoad(tree) {
                 let formId = this.$route.query.id;
                 tree.select(formId);
@@ -86,8 +96,8 @@ export default {
                         // 刷新页面的数据
                         // 方法1 直接刷新页面
                         // 方法2 修改router的地址，通过query的id加载
-                        this.$router.push({
-                            path: '/formdesign',
+			this.$router.push({
+                            path: this.$router.currentRoute.path,
                             query: {
                                 id: node.id
                             }

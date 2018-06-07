@@ -80,14 +80,15 @@ router.post('/saveForm', (req, res) => {
     		]);
   	} else {
   	    sqlParams.push(...[
-  		   	      params.name,
+  		   	    params.name,
                 params.code,
                 params.description,
+                params.version,
                 uuid.v1(),
-    			      new Date(),
-    			      0,
+    			new Date(),
+    			0,
                 params.formSource,
-    			      'form_01'
+    			'form_01'
     		]);
   	}
     pool.getConnection(function(err,conn) {

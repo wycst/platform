@@ -3,7 +3,7 @@
      <p slot="title">
         <Icon type="ios-flower"></Icon>
 	{{title}}
-     </p>   
+     </p>
      <p slot="extra">
               <Button type="ghost" icon="checkmark" @click='save'>保存</Button>
 	      <Button type="ghost" icon="checkmark" @click='preview'>预览</Button>
@@ -12,7 +12,7 @@
 	      <Button type="ghost" icon="checkmark" @click='showHtml'>显示html</Button>
 	      <Button type="ghost" icon="checkmark" @click='deleteRow'>删除一行</Button>
 	      <Button type="ghost" icon="checkmark" @click='backHome'>返回首页</Button>
-     </p>   
+     </p>
 
      <div :style="{height:(clientHeight - 20 )+'px',background : 'white',overflow : 'auto'}">
 	   <BorderLayout name='formdesign' ref='bl' :regions='regions'>
@@ -35,31 +35,16 @@ export default {
 		 return {
 		    offsetTop : 0,
 		    design : null
-		 }  
+		 }
 	},
 	created () {
            // let id = this.$route.query
 	   this.design = new FormDesign();
 	   this.$store.commit('initForm',this.design.form);
-
-           let id = this.$route.query.id;
+     let id = this.$route.query.id;
 	   if(id) {
-	        // 编辑表单
-		// 查询表单数据
-		this.$store.commit("loadForm",{
-		   id : id,
-		   callback : (data)=> {
-                        if(!data || data.length == 0) {
-			    alert('不存在的表单');
-			} else {
-			    let form = JSON.parse(data[0].form_source);
-			    this.design.form = form;
-			    this.$store.commit('initForm',form);
-			}
-		   }
-		});
+          this.loadForm(id);
 	   }
-           
 	},
 	destroyed() {
            this.design.destroyed();
@@ -81,6 +66,21 @@ export default {
 	   }
 	},
 	methods : {
+     loadForm(id) {
+          // 查询表单数据
+          this.$store.commit("loadForm",{
+              id : id,
+              callback : (data)=> {
+                    if(!data || data.length == 0) {
+                         alert('不存在的表单');
+                    } else {
+                         let form = JSON.parse(data[0].form_source);
+                         this.design.form = form;
+                         this.$store.commit('initForm',form);
+                    }
+              }
+           });
+     },
 	   save() {
 	       this.$store.commit('saveForm',this.$route.query.id);
 	   },
@@ -107,8 +107,11 @@ export default {
 	   }
 	},
 	watch : {
-          
-        }
+      '$route.query.id'(id) {
+          console.log('========== ' + id);
+          this.loadForm(id);
+      }
+  }
 }
 
 </script>

@@ -95,13 +95,12 @@ export default {
             this.expand = true;
             this.$emit('on-expand');
         },
-	handleSelect(id,selectedNodes) {
-	    console.log('=====123========');
-	    if(this.data.id == id) {
-	        this.data['selected'] = 'selected';
-		selectedNodes.push(this.data);
-	    }
-	}
+	      handleSelect(id,selectedNodes) {
+      	    if(this.data.id == id) {
+        	        this.data['selected'] = 'selected';
+        		      selectedNodes.push(this.data);
+      	    }
+    	}
     },
     beforeDestroy: function() {
         this.$off('on-expand',this.expand);

@@ -14,6 +14,11 @@
         <i v-if='children' class="ivu-icon ivu-icon-arrow-right-b">
         </i>
     </span>
+
+    <span>
+        <Icon :type="icon"></Icon>
+    </span>
+
     <span class="ivu-tree-title" :class="{'ivu-tree-title-selected' : selected}" @click='clickNode'>
         {{title}}
     </span>
@@ -81,7 +86,13 @@ export default {
         },
         selected() {
             return this.data['selected'];
-        }
+        },
+	icon() {
+	    let icon = this.data['icon'];
+	    let isDir = this.data['type'] == 'dir';
+            icon = icon || (isDir ? 'folder' : 'document-text');
+            return icon;
+	}
     },
     methods: {
         clickArrow() {

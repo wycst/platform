@@ -24,39 +24,44 @@ const form = {
     state: {
         contextPath : 'http://localhost:3000',
         url : {
-					   query            : '/form/datagrid',
-						 loadFormTree     : '/form/formTree',
-					   save             : '/form/saveForm',
-					   addState         : '/form/addState',
-					   loadState        : '/form/loadState',
-					   saveState        : '/form/saveState',
-					   queryById        : '/form/loadForm',
-					   disableForm  : '/form/disable',
-					   publishForm  : '/form/publish',
-					   deleteForm   : '/form/delete'
-				},
-				vm : null,
-				loading : false,
-				totalCount : 0,
-				regions : {
-						west : {
-							title : '导航',
-							width : 250,
-							component : FormMenu
-						},
-						east : {
-							title : '设置',
-							collapsed : true,
-							width : 350,
-							component : FormSetting
-						},
-						center : {
-							title : '设计',
-							component : FormEdit
-						}
+			   query            : '/form/datagrid',
+			   loadFormTree     : '/form/formTree',
+			   save             : '/form/saveForm',
+			   addState         : '/form/addState',
+			   loadState        : '/form/loadState',
+			   saveState        : '/form/saveState',
+			   queryById        : '/form/loadForm',
+			   disableForm  : '/form/disable',
+			   publishForm  : '/form/publish',
+			   deleteForm   : '/form/delete'
+		},
+		vm : null,
+		loading : false,
+		totalCount : 0,
+		regions : {
+			west : {
+				title : '导航',
+				width : 250,
+				component : FormMenu
 			},
+			east : {
+				title : '设置',
+				collapsed : true,
+				width : 350,
+				component : FormSetting
+			},
+			center : {
+				title : '设计',
+				component : FormEdit
+			}
+		},
+
 		formTreeNodeList : [],
 		form : {},
+
+        design : null,
+	    currentFormId : null,
+
         form_uid : null,
 		showStateList : false,
 		stateList : [],
@@ -76,8 +81,10 @@ const form = {
 		rows : []
     },
     mutations: {
-		initForm(state,initForm) {
-			state.form = initForm;
+		initForm(state,design) {
+            state.design = design;
+			state.form = state.design.form;
+
             state.showStateList = false;
             state.stateList.splice(0,state.stateList.length);
 			Object.assign(state.selection,{
@@ -151,22 +158,32 @@ const form = {
 							code :null,
 							description : null
 						});
+					  this.commit('reloadForm');
     		     }).catch(function(error) {
     			      alert(error);
     			 });
 		},
         saveForm(state,option) {
+
             let queryParams = Object.assign({},state.form.baseProps);
-            let id = option.id;
-			if(id) {
-			    queryParams.id = id;
-				 // 保存状态信息
-				let stateId = state.selection.selectStateId;
-				if(stateId) {
-				   this.commit('saveState',option);
-				   return ;
-				}
-            }
+			let formId = state.currentFormId;
+
+            if(!formId) {
+			   alert('请选择一个表单!');
+			   return ;
+			}
+
+			let stateId = state.selection.selectStateId;
+			if(stateId) {
+			   // 如果已选择了state，则保存状态信息
+			   let stateParams = {
+			       id : stateId
+			   };
+			   this.commit('setStateParams',stateParams);
+               queryParams.currentState = stateParams;
+			}
+
+			queryParams.id = formId;
             queryParams.formSource = JSON.stringify(state.form,0,4);
 
             axios.post(state.contextPath + state.url.save,
@@ -179,12 +196,9 @@ const form = {
     			      alert(error);
     			 });
 		},
-	    saveState(state,option) {
+	    setStateParams(state,stateParams) {
 			let formState = state.formState;
-			let queryParams = Object.assign({},formState.baseProps);
-
-			queryParams.id = state.selection.selectStateId;
-            // 每次保存根据编辑的结果初始化store的状态信息
+			Object.assign(stateParams,formState.baseProps);
             formState.elementsState = {};
 			state.form.rows.forEach( row => {
 				 row.columns.forEach(column => {
@@ -192,16 +206,7 @@ const form = {
 				 });
 				 formState.elementsState[row.rowId] = row.state;
 			});
-            queryParams.stateSource = JSON.stringify(formState,0,4);
-            axios.post(state.contextPath + state.url.saveState,
-				 qs.stringify(queryParams)).then(res => {
-    			      if(option && option.callback) {
-						  option.callback.call(this,2);
-					  }
-					  alert('sucess');
-    		     }).catch(function(error) {
-    			      alert(error);
-    			 });
+            stateParams.stateSource = JSON.stringify(formState,0,4);
 		},
 	    deleteForm(state,option) {
 
@@ -242,9 +247,8 @@ const form = {
 					let formState = JSON.parse(stateSource);
                     Object.assign(state.formState,formState);
 				} else {
-
-					Object.assign(state.formState,formState);
-				}
+				    alert('数据异常!');
+				} 
 				this.commit('mergeState');
 		    }).catch(function(error) {
                 console.trace(error);
@@ -252,8 +256,7 @@ const form = {
 			});
 
 		},
-		loadForm(state,option) {
-			let id = option.id;
+		loadForm(state,id) {
             state.loading = true;
 		    axios.get(state.contextPath + state.url.queryById,{
 				params: {
@@ -262,13 +265,21 @@ const form = {
 				}
 			}).then(res => {
 				state.loading = false;
-				if(res.data && option.callback) {
-					state.form_uid = res.data[0].uid;
+				if(res.data == 'error') {
+				    alert('form[id='+id+']加载失败!');
+					return ;
+				}
+				state.currentFormId = id;
+                let formData = res.data;
+				if(formData) {
+					state.form_uid = formData.uid;
 					state.stateList.splice(0,state.stateList.length);
-					if(res.data[0].stateList) {
-						state.stateList.push(...res.data[0].stateList);
+					if(formData.stateList) {
+						state.stateList.push(...formData.stateList);
 					}
-				    option.callback.call(this,res.data);
+                    let form = JSON.parse(formData.form_source);
+				    state.design.form = form;
+					state.form = form;
 					// show statelist
 					state.showStateList = true;
 				}
@@ -277,6 +288,9 @@ const form = {
 				alert(error);
 			});
 
+		},
+		reloadForm(state) {
+			this.commit('loadForm',state.currentFormId);
 		},
 		loadFormData (state,vm) {
 			state.loading = true;

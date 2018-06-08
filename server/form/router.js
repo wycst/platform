@@ -33,9 +33,9 @@ var jsonWrite = function(res, ret) {
 // 加载表单树
 router.get('/formTree', (req, res) => {
     var params = req.body;
-	  var id = params.id;
+	var id = params.id;
     var dirSql = "select uid as id,name,parent_uid as pid,'dir' as type from form_dir_info dir where 1 = 1 ";
-	  var formSql = "select f.id,f.name,f.dir_uid as pid,'node' as type  from form_info f";
+	var formSql = "select f.id,f.name,f.dir_uid as pid,'node' as type  from form_info f";
     let list = [];
     pool.getConnection(function(err,conn) {
         if(err) {
@@ -69,9 +69,10 @@ router.post('/saveForm', (req, res) => {
 	var id = params.id;
     var sql = id ? $sql.form.update:$sql.form.insert;
 	var sqlParams = [];
+	
     if(id) {
   	    sqlParams.push(...[
-    		   	      params.name,
+    		   	  params.name,
                   params.code,
                   params.description,
                   new Date(),
@@ -93,16 +94,42 @@ router.post('/saveForm', (req, res) => {
   	}
     pool.getConnection(function(err,conn) {
         if(err) {
-                console.log(' get connect error ');
+            console.log(' get connect error ');
+			jsonWrite(res, "error");
         } else {
             conn.query(sql, sqlParams, function(err, result) {
                 if (err) {
                     console.log(err);
-                }
-                if (result) {
-                    jsonWrite(res, result);
-                }
-                conn.release();
+                    jsonWrite(res, "error");
+                } else {
+                    var currentState = params.currentState;
+					console.log(' save currentState ' + (currentState != null));
+                    if(currentState) {
+					     // 保存视图
+						 var stateSql = $sql.state.update;
+						 var stateParams = [
+							  currentState.name,
+							  currentState.code,
+							  currentState.description,
+							  currentState.stateSource,
+							  new Date(),
+							  '',
+							  currentState.id
+						 ]
+                         conn.query(stateSql, stateParams, function(err, result) {
+							if (err) {
+								console.log(err);
+								jsonWrite(res, "error");
+							} else {
+								jsonWrite(res, "success");
+							}
+							conn.release();
+						});
+					} else {
+						jsonWrite(res, "success");
+					    conn.release();
+					}
+				}
             });
         }
     });
@@ -115,24 +142,39 @@ router.get('/loadForm', (req, res) => {
       var params = req.query;
 	  var id = params.id;
       var sql = $sql.form.select;
+      
+	  if(!id) {
+		  console.log(' id is null ');
+		  jsonWrite(res, "error");
+		  return ;
+	  }
 
       pool.getConnection(function(err,conn) {
           if(err) {
-                  console.log(' get connect error ');
+              console.log(' get connect error ');
+			  jsonWrite(res, "error");
           } else {
               conn.query(sql, [id], function(err, result) {
                   if (err) {
                       console.log(err);
+					  jsonWrite(res, "error");
 					  return ;
                   }
 				  var form = result[0];
+                  if(!form) {
+				      console.log(' form[id=' + id + '] is not exist');
+					  jsonWrite(res, "error");
+					  return ;
+				  }
+
                   conn.query($sql.state.queryList,[form.uid],function(e, stateList) {
 					  if (e) {
 						  console.log(e);
+						  jsonWrite(res, "error");
 						  return ;
 					  }
 					  form.stateList = stateList;
-                      jsonWrite(res, result);
+                      jsonWrite(res, form);
 					  conn.release();
 				  });
 
@@ -222,7 +264,6 @@ router.post('/saveState', (req, res) => {
     			  id
     		]);
 	console.log(' sql : ' + sql);
-    console.log(' sqlParams : ' + sqlParams);
 
     pool.getConnection(function(err,conn) {
         if(err) {
@@ -243,6 +284,5 @@ router.post('/saveState', (req, res) => {
 
 
 });
-
 
 module.exports = router;

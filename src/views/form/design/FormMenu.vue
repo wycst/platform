@@ -11,7 +11,13 @@
             <Button type="ghost" @click='addState'>添加</Button>
             <Button type="ghost">删除</Button>
             <Button type="ghost" @click='unselectState'>取消选中</Button>
-        </ButtonGroup>
+	</ButtonGroup>
+ 
+        <RadioGroup v-model="button4" type="button">
+	    <Radio><Icon type="plus"></Icon></Radio>
+	    <Radio><Icon type="minus"></Icon></Radio>
+	</RadioGroup>
+
         <Menu ref='stateMenu' :active-name='activeStateName' @on-select='selectState' width='auto'>
             <template v-for='state in stateList'>
                 <MenuItem :name="state.id">
@@ -96,12 +102,17 @@ export default {
                         // 刷新页面的数据
                         // 方法1 直接刷新页面
                         // 方法2 修改router的地址，通过query的id加载
-			this.$router.push({
-                            path: this.$router.currentRoute.path,
-                            query: {
-                                id: node.id
-                            }
-                        });
+			// 方法3 直接loadForm，传递表单的id
+			if(formId) {
+			    this.$router.push({
+				    path: this.$router.currentRoute.path,
+				    query: {
+					id : node.id
+				    }
+				});
+			} else {
+			    this.$store.commit("loadForm",node.id);
+			}
                         this.unselectState();
                     }
                 }

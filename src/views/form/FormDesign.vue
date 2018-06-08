@@ -1,8 +1,15 @@
+<style scoped>
+.title {
+    margin-left : 5px;
+}
+
+
+</style>
 <template>
 <Card ref="mainCard">
      <p slot="title">
         <Icon :type="$route.query.id ? 'edit' : 'plus'"></Icon>
-	{{title}}
+	<span class='title'>{{title}}</span>
      </p>
      <p slot="extra">
               <Button type="ghost" icon="checkmark" @click='save'>保存</Button>
@@ -34,18 +41,15 @@ export default {
 	data () {
 		 return {
 		    offsetTop : 0,
-		    initForm : null,
 		    design : null
 		 }
 	},
 	created () {
-           // let id = this.$route.query
 	   this.design = new FormDesign();
-	   this.initForm = this.design.form;
+	   this.$store.commit('initForm',this.design);
 	   let id = this.$route.query.id;
-	   this.$store.commit('initForm',this.design.form);
 	   if(id) {
-	       this.loadForm(id);
+	       this.$store.commit("loadForm",id);
 	   } 
 	},
 	destroyed() {
@@ -68,32 +72,14 @@ export default {
 	   }
 	},
 	methods : {
-	     loadForm(id) {
-		  // 查询表单数据
-		  this.$store.commit("loadForm",{
-		      id : id,
-		      callback : (data)=> {
-			    if(!data || data.length == 0) {
-				 alert('不存在的表单');
-			    } else {
-				 let form = JSON.parse(data[0].form_source);
-				 this.design.form = form;
-				 this.$store.commit('setCurrentForm',form);
-			    }
-		      }
-		   });
-	     },
 	   save() {
 	       let me = this;
 	       this.$store.commit('saveForm',{
-	           id : this.$route.query.id,
-		   callback(type) {
+		   callback() {
 		       // 重新加载tree或state
-		       if(type == 1) {
-		           me.$eventTarget.$emit('on-refresh-formtree');
-		       } 
+		       me.$eventTarget.$emit('on-refresh-formtree');
 		       // 重新加载form
-		       me.loadForm(me.$route.query.id);
+		       me.$store.commit("reloadForm");
 		   }
 	       });
 	   },
@@ -122,11 +108,8 @@ export default {
 	watch : {
 	      '$route.query.id'(id) {
 		  if(id) {
-		      this.loadForm(id);
-		  } else {
-		     // this.design.form = JSON.parse(JSON.stringify(this.initForm));
-		     // this.$store.commit('setCurrentForm',this.design.form);
-		  }
+		      this.$store.commit("loadForm",id);
+		  } 
 	      }
   }
 }

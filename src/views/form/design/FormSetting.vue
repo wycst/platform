@@ -8,7 +8,7 @@
 
 <template>
 
-  <Accordion v-if='formState == null' fit @change='change' @item-click='itemClick'>
+  <Accordion v-if='designOption.type == "form"' fit @change='change' @item-click='itemClick'>
       <AccordionPanel title='表单信息' active>
           <Form class='settingForm' :model="baseProps" :label-width="100">
               <FormItem label="名称" prop="name">
@@ -247,8 +247,8 @@ export default {
             }
     },
     computed: {
-        formState() {
-            return this.$store.state.form.selection.selectStateId;
+        designOption() {
+            return this.$store.state.form.designOption;
         },
         current() {
                 return this.$store.state.form.selection.selectType;
@@ -338,7 +338,7 @@ export default {
                     if (oldColumn) {
                         oldColumn.selected = false;
                     }
-		    if(this.formState == null) {
+		    if(this.designOption.type == "form") {
 		        if(column) {
 			    this.setColumnValues(column);
 			}
@@ -348,7 +348,7 @@ export default {
         },
         selectRow: {
 	    handler(row) {
-		if(this.formState == null) {
+		if(this.designOption.type == "form") {
 		    if (row) {
 			this.setRowValues(row);
 		    }
@@ -359,7 +359,7 @@ export default {
         },
         selectButton: {
             handler(button) {
-                if(this.formState == null) {
+                if(this.designOption.type == "form") {
 		    if (button) {
 			this.setButton(button);
 		    }

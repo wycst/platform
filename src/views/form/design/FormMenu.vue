@@ -12,7 +12,7 @@
             <Button type="ghost">删除</Button>
             <Button type="ghost" @click='unselectState'>取消选中</Button>
 	</ButtonGroup>
- 
+
         <RadioGroup v-model="button4" type="button">
 	    <Radio><Icon type="plus"></Icon></Radio>
 	    <Radio><Icon type="minus"></Icon></Radio>
@@ -67,14 +67,17 @@ export default {
                 }
                 return null;
             },
-	    showStateList() {
-	        return this.$store.state.form.showStateList;
-	    },
+      	    showStateList() {
+      	        return this.$store.state.form.showStateList;
+      	    },
             stateList() {
                 return this.$store.state.form.stateList;
             },
             formTreeDataUrl() {
                 return this.$store.state.form.contextPath + this.$store.state.form.url.loadFormTree;
+            },
+            designOption() {
+                return this.$store.state.form.designOption;
             }
     },
     updated() {
@@ -85,7 +88,7 @@ export default {
 	}
     },
     mounted() {
-        this.$eventTarget.$on('on-refresh-formtree',this.refreshFormtree);  
+        this.$eventTarget.$on('on-refresh-formtree',this.refreshFormtree);
     },
     methods: {
             refreshFormtree() {
@@ -102,19 +105,20 @@ export default {
                         // 刷新页面的数据
                         // 方法1 直接刷新页面
                         // 方法2 修改router的地址，通过query的id加载
-			// 方法3 直接loadForm，传递表单的id
-			if(formId) {
-			    this.$router.push({
-				    path: this.$router.currentRoute.path,
-				    query: {
-					id : node.id
-				    }
-				});
-			} else {
-			    this.$store.commit("loadForm",node.id);
-			}
+                  			// 方法3 直接loadForm，传递表单的id
+                  			if(formId) {
+                  			    this.$router.push({
+                  				    path: this.$router.currentRoute.path,
+                  				    query: {
+                  					      id : node.id
+                  				    }
+                  				});
+                  			} else {
+                  			    this.$store.commit("loadForm",node.id);
+                  			}
                         this.unselectState();
                     }
+                    this.designOption.type = 'form';
                 }
             },
             addState() {
@@ -153,6 +157,8 @@ export default {
                 });
                 this.activeStateName = name;
                 this.$store.commit('loadState', name);
+
+                this.designOption.type = 'state';
             },
             titleRender(source, index) {
                 if (source) {

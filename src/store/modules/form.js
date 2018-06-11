@@ -4,6 +4,7 @@ import qs from 'qs';
 
 import FormMenu from '@/views/form/design/FormMenu.vue'
 import FormSetting from '@/views/form/design/FormSetting.vue'
+import Settings from '@/views/form/design/Settings.vue'
 import FormEdit from '@/views/form/FormEdit.vue'
 
 const initState = {
@@ -28,6 +29,7 @@ const form = {
 			   loadFormTree     : '/form/formTree',
 			   save             : '/form/saveForm',
 			   addState         : '/form/addState',
+			   delState         : '/form/delState',
 			   loadState        : '/form/loadState',
 			   saveState        : '/form/saveState',
 			   queryById        : '/form/loadForm',
@@ -48,7 +50,7 @@ const form = {
 				title : '设置',
 				collapsed : true,
 				width : 350,
-				component : FormSetting
+				component : Settings
 			},
 			center : {
 				title : '设计',
@@ -59,8 +61,13 @@ const form = {
 			type : 'form'
 		},
 		formTreeNodeList : [],
-		form : {},
-
+		form : {
+		    state : {
+				render : true,
+				hide : false,
+				readonly : false
+			}
+		},
         design : null,
 	    currentFormId : null,
 
@@ -124,12 +131,17 @@ const form = {
 		// 清除form对象中的state信息
 		clearState(state) {
             let form = state.form;
-			delete form.state;
+            let initStateOption = {
+				render : true,
+				hide : false,
+				readonly : false
+			};
+			Vue.set(form,'state',{...initStateOption});
             form.rows.forEach( row => {
                  row.columns.forEach(column => {
-				     delete column.state;
+				     Vue.set(column,'state',{...initStateOption});
 				 });
-                 delete row.state;
+				 Vue.set(row,'state',{...initStateOption});
 			});
 			// 按钮信息的state
 		},
@@ -164,6 +176,31 @@ const form = {
     		     }).catch(function(error) {
     			      alert(error);
     			 });
+		},
+	    delState(state) {
+			let selectStateId = state.selection.selectStateId;
+            if(!selectStateId) {
+			    alert("请选择要删除的状态！");
+				return ;
+			}
+			if(window.confirm('确定要删除当前选择的状态吗？')) {
+			    axios.get(state.contextPath + state.url.delState,{
+					params: {
+						'id' : selectStateId,
+						 t : new Date().getTime()
+					}
+				}).then(res => {
+				    if(res.data == "success") {
+					    alert("success");
+					}
+					this.commit('reloadForm');
+					state.designOption.type = 'form';
+				}).catch(function(error) {
+    			    alert(error);
+    			});
+			}
+            
+
 		},
         saveForm(state,option) {
 

@@ -1,24 +1,22 @@
-
+<style>
+.stateMenu .ivu-menu-item {
+    padding: 7px 24px;
+}
+</style>
 
 <template>
-
 <Accordion fit>
     <AccordionPanel title='表单目录' active>
-        <ModelTree ref='formTree' titleKey='name' dataType='raw' :url='formTreeDataUrl' @on-load='afterTreeLoad' @on-node-click='selectForm'></ModelTree>
+        <ModelTree ref='formTree' titleKey='name' dataType='raw' :url='formTreeDataUrl' @on-load='afterTreeLoad' @on-node-click='selectForm' @on-node-dblclick='dblclickTreeNode'></ModelTree>
     </AccordionPanel>
     <AccordionPanel title='状态列表' :hide='!showStateList'>
         <ButtonGroup style='margin-bottom:5px;'>
-            <Button type="ghost" @click='addState'>添加</Button>
-            <Button type="ghost">删除</Button>
+            <Button type="ghost" icon="plus" @click='addState'></Button>
+            <Button type="ghost" icon="minus" @click='delState'></Button>
             <Button type="ghost" @click='unselectState'>取消选中</Button>
 	</ButtonGroup>
 
-        <RadioGroup v-model="button4" type="button">
-	    <Radio><Icon type="plus"></Icon></Radio>
-	    <Radio><Icon type="minus"></Icon></Radio>
-	</RadioGroup>
-
-        <Menu ref='stateMenu' :active-name='activeStateName' @on-select='selectState' width='auto'>
+        <Menu ref='stateMenu' class='stateMenu' :active-name='activeStateName' @on-select='selectState' width='auto'>
             <template v-for='state in stateList'>
                 <MenuItem :name="state.id">
                     <Icon type="heart1"></Icon>
@@ -26,6 +24,7 @@
                 </MenuItem>
             </template>
         </Menu>
+
     </AccordionPanel>
     <AccordionPanel title='表单模型树'>
         <ModelTree :titleRender='titleRender' @on-node-click='clickNode' @on-select-change='selectChange' childrenKey='columns' :model='this.$store.state.form.form.rows'></ModelTree>
@@ -91,6 +90,11 @@ export default {
         this.$eventTarget.$on('on-refresh-formtree',this.refreshFormtree);
     },
     methods: {
+            dblclickTreeNode(node) {
+	        if(node.type == 'node') {
+		    this.$layouts.formdesign.eastCollapse(false);
+		}
+	    },
             refreshFormtree() {
 	        this.$refs.formTree.reload();
 	    },
@@ -105,18 +109,22 @@ export default {
                         // 刷新页面的数据
                         // 方法1 直接刷新页面
                         // 方法2 修改router的地址，通过query的id加载
-                  			// 方法3 直接loadForm，传递表单的id
-                  			if(formId) {
-                  			    this.$router.push({
-                  				    path: this.$router.currentRoute.path,
-                  				    query: {
-                  					      id : node.id
-                  				    }
-                  				});
-                  			} else {
-                  			    this.$store.commit("loadForm",node.id);
-                  			}
-                        this.unselectState();
+			// 方法3 直接loadForm，传递表单的id
+			if(formId) {
+			    this.$router.push({
+				    path: this.$router.currentRoute.path,
+				    query: {
+				        id : node.id
+				    }
+				});
+			    this.clearState();
+			} else {
+                            let currentFormId = this.$store.state.form.currentFormId;
+                            if(currentFormId != node.id) {
+			        this.$store.commit("loadForm",node.id);
+			        this.clearState();
+			    }
+			}
                     }
                     this.designOption.type = 'form';
                 }
@@ -139,27 +147,36 @@ export default {
                         me.$store.commit('addState');
                     },
                     onCancel() {
-                        // canel
+                        // cancel
                     }
                 });
             },
-            unselectState() {
-                this.$store.commit('setSelection', {
+	    clearState() {
+	        this.$store.commit('setSelection', {
                     selectStateId: null
                 });
                 this.activeStateName = null;
                 this.$store.commit('clearState');
+	    },
+            unselectState() {
+	        this.clearState();
+                this.designOption.type = 'form';
             },
             selectState(name) {
                 // load state by name，then commit store
-                this.$store.commit('setSelection', {
-                    selectStateId: name
-                });
-                this.activeStateName = name;
-                this.$store.commit('loadState', name);
-
+                let selectStateId = this.$store.state.form.selection.selectStateId;
+                if(selectStateId != name) {
+		    this.$store.commit('setSelection', {
+			selectStateId: name
+		    });
+		    this.activeStateName = name;
+		    this.$store.commit('loadState', name);
+		}
                 this.designOption.type = 'state';
             },
+	    delState() {
+	        this.$store.commit('delState');
+	    },
             titleRender(source, index) {
                 if (source) {
                     if (source.rowConfig) {
@@ -197,7 +214,12 @@ export default {
                     }
                 },
                 deep: true
-        }
+        },
+	'$route.query.id'(id) {
+	    if(id && this.$refs.formTree) {
+	        this.$refs.formTree.select(id);
+	    }
+	 }
 
     }
 }

@@ -8,7 +8,7 @@
 <template>
 <Card ref="mainCard">
      <p slot="title">
-        <Icon :type="$route.query.id ? 'edit' : 'plus'"></Icon>
+        <Icon :type="$store.state.form.currentFormId ? 'edit' : 'plus'"></Icon>
 	<span class='title'>{{title}}</span>
      </p>
      <p slot="extra">

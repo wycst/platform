@@ -132,7 +132,14 @@ export default {
               window.removeEventListener('resize',this.delayResize);	
 	   },
 	   resize() {
-	      this.accordionHeight = this.accordionEl.getBoundingClientRect().height;
+	      // if hide 
+	      if(this.$el.style.display != 'none') {
+	          this.accordionHeight = this.accordionEl.getBoundingClientRect().height;
+	      } else {
+	          this.$el.style.display = 'block';
+                  this.accordionHeight = this.accordionEl.getBoundingClientRect().height;
+	          this.$el.style.display = 'none';
+	      }
 	   },
 	   delayResize(delay) {
 	      setTimeout(()=>{

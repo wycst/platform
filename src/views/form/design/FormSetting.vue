@@ -8,7 +8,7 @@
 
 <template>
 
-  <Accordion v-if='designOption.type == "form"' fit @change='change' @item-click='itemClick'>
+  <Accordion fit @change='change' @item-click='itemClick'>
       <AccordionPanel title='表单信息' active>
           <Form class='settingForm' :model="baseProps" :label-width="100">
               <FormItem label="名称" prop="name">
@@ -42,19 +42,13 @@
           <PropertyTable size="small" ref="buttonRef" border :propertyColumns="propertyColumns" :propertyValues="buttonValues"></PropertyTable>
       </AccordionPanel>
   </Accordion>
-
-  <StateSetting v-else></StateSetting>
-
 </template>
 
 <script>
 
 import ComponentPropsSetting from '../settings/ComponentPropsSetting'
-import StateSetting from '@/views/form/design/StateSetting.vue'
-
 export default {
     components: {
-        StateSetting,
         ComponentPropsSetting
     },
     data() {

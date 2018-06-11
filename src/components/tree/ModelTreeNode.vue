@@ -19,7 +19,7 @@
         <Icon :type="icon"></Icon>
     </span>
 
-    <span class="ivu-tree-title" :class="{'ivu-tree-title-selected' : selected}" @click='clickNode'>
+    <span class="ivu-tree-title" :class="{'ivu-tree-title-selected' : selected}" @click='clickNode' @dblclick='dblclickNode'>
         {{title}}
     </span>
     <ul v-show='children && expand' class="ivu-tree-children">
@@ -89,8 +89,11 @@ export default {
         },
 	icon() {
 	    let icon = this.data['icon'];
-	    let isDir = this.data['type'] == 'dir';
-            icon = icon || (isDir ? 'folder' : 'document-text');
+            if(icon) {
+	        return icon;
+	    }
+	    let isDir = this.data['type'] == 'dir' || (this.children && this.children.length > 0);
+            icon = isDir ? 'folder' : 'document-text';
             return icon;
 	}
     },
@@ -102,6 +105,9 @@ export default {
             this.data['selected'] = !(this.data['selected'] === true);
             this.dispatch('ModelTree','clickNode',this.data,this.parentData);
         },
+	dblclickNode() {
+	    this.dispatch('ModelTree','dblclickNode',this.data,this.parentData);
+	},
         expandNode() {
             this.expand = true;
             this.$emit('on-expand');

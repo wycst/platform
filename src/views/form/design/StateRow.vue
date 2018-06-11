@@ -77,6 +77,9 @@ export default {
         rowObject : Object
     },
     created() {
+
+        this.initState();
+
         // 初始化数据
 	this.$eventTarget.$on('hideAll',this.hideAll);
 	this.$eventTarget.$on('renderAll',this.renderAll);
@@ -97,6 +100,27 @@ export default {
 	}
     },
     methods : {
+        initState() {
+	    let initStateOption = {
+		render: true,
+		hide: false,
+		readonly: false
+	    };
+	    if (this.rowObject.state == undefined) {
+		this.$set(this.rowObject, "state", {...initStateOption
+		});
+	    }
+
+	    if (this.rowObject.columns) {
+		this.rowObject.columns.forEach(column => {
+		    if (column.state == undefined) {
+			this.$set(column, "state", {...initStateOption
+			});
+		    }
+		});
+	    }
+
+	},
         toggleExpand() {
 	    this.expand = !this.expand;
 	},
@@ -117,6 +141,14 @@ export default {
             this.rowObject.columns.forEach(column => {
 	        column.state.readonly = value;
 	    });
+	}
+    },
+    watch : {
+        'rowObject' : {
+	    handler(v) {
+	        this.initState();
+	    },
+	    deep : true
 	}
     }
 }

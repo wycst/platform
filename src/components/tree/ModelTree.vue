@@ -58,6 +58,7 @@ export default {
         } 
 	// child后代组件继承emitter后直接dispatch会触发
         this.$on('clickNode',this.clickNode);
+	this.$on('dblclickNode',this.dblclickNode);
         this.$emit('on-render');
     },
     computed: {
@@ -116,6 +117,9 @@ export default {
            });
            this.selectedNodes.splice(0,this.selectedNodes.length);
         },
+	dblclickNode(node,parentNode) {
+	   this.$emit('on-node-dblclick',node,parentNode);
+	},
         clickNode(node,parentNode) {
            if(node.selected) {
                   if(!this.mutilSelect) {

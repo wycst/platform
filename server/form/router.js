@@ -247,6 +247,36 @@ router.get('/loadState', (req, res) => {
 
 });
 
+// 删除状态接口
+router.get('/delState', (req, res) => {
+    var params = req.query;
+	var id = params.id;
+    var sql = $sql.state.deleteById;
+	var sqlParams = [];
+
+    console.log(' sql : ' + sql);
+	console.log(' params : ' + [id]);
+
+    pool.getConnection(function(err,conn) {
+        if(err) {
+            console.log(' get connect error ');
+        } else {
+            conn.query(sql, [id], function(err, result) {
+                if (err) {
+                    console.log(err);
+					return ;
+                }
+                if (result) {
+                    jsonWrite(res, "success");
+                }
+                conn.release();
+            });
+        }
+    });
+
+
+});
+
 // 保存状态接口
 router.post('/saveState', (req, res) => {
     var params = req.body;

@@ -55,7 +55,9 @@ const form = {
 				component : FormEdit
 			}
 		},
-
+    designOption : {
+			type : 'form'
+		},
 		formTreeNodeList : [],
 		form : {},
 
@@ -248,7 +250,7 @@ const form = {
                     Object.assign(state.formState,formState);
 				} else {
 				    alert('数据异常!');
-				} 
+				}
 				this.commit('mergeState');
 		    }).catch(function(error) {
                 console.trace(error);

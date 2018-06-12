@@ -1,9 +1,9 @@
 <template>
 
     <Form ref='form' :model='formData' :label-width='labelWidth'>
-        
+
 	<div :class='{"form-layout-default" : layout == "default","form-layout-grid" : layout == "grid"}'>
-            
+
 	    <template v-if='operationRow.align == "top"'>
                 <Row class='form-row form-operation-row' type="flex" :align='operationRow.rowConfig.align' :justify="operationRow.rowConfig.justify">
                     <Col>
@@ -38,13 +38,14 @@
                             <template v-else>
                                 <FormDynamicRender v-if='column.model' :model='column.model' />
                             </template>
+                            <div v-if='column.state.readonly' class='item-mask'></div>
                         </Col>
                     </template>
                 </Row>
             </template>
 
             <template v-if='operationRow.align == "bottom"'>
-                
+
 		<div style='border:0;height:20px;margin-bottom:15px;border-bottom:1px solid #e9eaec;'>
 			<!--split-->
 		</div>
@@ -96,10 +97,10 @@
 	components : {
 	},
 	created() {
-            // Í¨¹ýformId²éÑ¯form¶ÔÏó
+            // Í¨ï¿½ï¿½formIdï¿½ï¿½Ñ¯formï¿½ï¿½ï¿½ï¿½
             this.loadForm();
 
-	    // ½âÎöform¶ÔÏó£¬¼ÓÔØËùÓÐµÄformitemÁÐ£¬È¡³ökey£¬Ìí¼Óµ½this.formData
+	    // ï¿½ï¿½ï¿½ï¿½formï¿½ï¿½ï¿½ó£¬¼ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ðµï¿½formitemï¿½Ð£ï¿½È¡ï¿½ï¿½keyï¿½ï¿½ï¿½ï¿½ï¿½Óµï¿½this.formData
             if(this.form.rows) {
                 // this.formData = {};
 	        this.form.rows.forEach(row => {
@@ -122,7 +123,7 @@
 		    state : {},
 		    hideColumns : [],
 		    formData: {}
-		 }  
+		 }
 	},
 	mounted () {
 	   console.log('============= formId = ' + this.formId);
@@ -156,7 +157,7 @@
 		    callback: formData =>{
 			let form = JSON.parse(formData.form_source);
 			this.form = form;
-			// ¼ÓÔØ×´Ì¬
+			// ï¿½ï¿½ï¿½ï¿½×´Ì¬
 			this.loadState();
 			// this.loadData();
 		    }
@@ -188,7 +189,7 @@
 		    hide: false,
 		    readonly: false
 		};
-                
+
 		form.rows.forEach(row =>{
 		    row.columns.forEach(column => {
 			let columnState = formState.elementsState[column.columnId];
@@ -200,7 +201,7 @@
 		    });
 		});
 
-		// state ºÏ²¢
+		// state ï¿½Ï²ï¿½
                 form.rows.forEach(row =>{
 		    row.columns.forEach(column => {
 			let columnState = formState.elementsState[column.columnId];
@@ -226,7 +227,7 @@
 				            hideColumns.push(column);
 				        } else {
 					    if(readonlyRow || column.state.readonly) {
-					        Vue.set(column.model.props, 'readonly', true);
+					        // Vue.set(column.model.props, 'readonly', true);
 					    }
 					}
 				     }
@@ -237,7 +238,7 @@
 			  if(row.columns.length == 0) {
 			      hideRow = true;
 			  }
-		      } 
+		      }
 		      return renderRow && !hideRow;
 		});
                 form.rows = rows;
@@ -268,7 +269,7 @@
 	   },
 	   submitForm() {
 	       console.log('========== submitForm call');
-	       console.log('========== this.formData £º  ' + JSON.stringify(this.formData));
+	       console.log('========== this.formData ï¿½ï¿½  ' + JSON.stringify(this.formData));
 	   },
 	   resetForm() {
 	       this.$refs.form.resetFields();
@@ -285,22 +286,26 @@
 
 <style scoped>
   .form-item-row { margin: 0; padding: 0;}
-  .form-layout-default .form-item-row { 
-      margin: 2px; 
+  .form-layout-default .form-item-row {
+      margin: 2px;
       padding: 2px;
       padding-right: 20px;
       padding-left: 20px;
       overflow:hidden;
    }
 
-  .form-layout-grid .form-item-row { 
-      margin: 0px; 
-      // min-height : 32px;
+  .form-layout-grid .ivu-select-disabled  .ivu-select-input[disabled] {
+       color: red !important;
+  }
+
+  .form-layout-grid .form-item-row {
+      margin: 0px;
       overflow:hidden;
       border : 1px #ccc solid;
       border-top : 0px;
       background-color : #fafafa;
   }
+
   .form-layout-grid .form-item-row-first {
       border-top: 1px #ccc solid;
   }
@@ -317,13 +322,25 @@
 
   .form-layout-grid .ivu-form-item {
       margin-bottom: 0px;
-  } 
+  }
   .form-layout-grid .form-item-selected {
       background: #ebf7ff;
   }
   .form-layout-grid .operation-row-selected {
       background: #ebf7ff;
   }
+  .item-mask {
+      z-index: 100;
+      background: #FFF;
+      height: 100%;
+      opacity: 0.1;
+      filter: alpha(opacity=10);
+      position: absolute;
+      right: 0;
+      top: 0;
+      width: 100%;
+  }
+
 
 </style>
 <style>

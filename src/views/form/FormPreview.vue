@@ -8,27 +8,23 @@
 		 <Button type="ghost" icon="checkmark" @click="backEdit">返回编辑</Button>
 	     </p>   
 	     <div :style="{height:(clientHeight - 20 )+'px',width :'100%',background : 'white',overflow : 'auto',border : '0px solid gray'}">
-		 <FormComponent formId='123'></FormComponent>
+		 <FormDisplay :formId='$route.query.formId' :stateId='$route.query.stateId'></FormDisplay>
 	     </div>
 	</Card>
 </template>
 
 <script>
 
-import FormComponent from '@/components/form/FormComponent'
+import FormDisplay from './FormDisplay'
 // document.title = '表单预览';
 export default {
         name : 'form-preview',
 	components : {
-	    FormComponent
+	    FormDisplay
 	},
 	data () {
 		 return {
-		    offsetTop : 0,
-		    t : 2,
-		    rows : [{
-		    },{
-		    }]
+		    offsetTop : 0
 		 }  
 	},
 	mounted () {

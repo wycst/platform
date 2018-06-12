@@ -96,7 +96,17 @@ export default {
 	       this.$refs.bl.$regions.center.deleteRow();
 	   },
            preview() {
-              this.$router.push("/formpreview");
+	      let currentFormId = this.$store.state.form.currentFormId;
+	      let query = {
+	          formId : currentFormId
+	      };
+              if(this.$store.state.form.selection.selectStateId) {
+	          query.stateId = this.$store.state.form.selection.selectStateId;
+	      }
+	      this.$router.push({
+				    path: "/formpreview",
+				    query: query
+				});
 	   },
 	   backHome () {
 	      this.$router.push("/home");

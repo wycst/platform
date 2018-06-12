@@ -1,9 +1,11 @@
 <template>
-    <Form ref='form' :model='formData' :label-width='form.common_cfg.labelWidth'>
-        <div :class='{"form-layout-default" : form.common_cfg.layout == "default","form-layout-grid" : form.common_cfg.layout == "grid"}'>
+
+    <Form ref='form' :model='formData' :label-width='labelWidth'>
+        
+	<div :class='{"form-layout-default" : layout == "default","form-layout-grid" : layout == "grid"}'>
             
-	    <template v-if='form.operationRow.align == "top"'>
-                <Row class='form-row form-operation-row' type="flex" :align='form.operationRow.rowConfig.align' :justify="form.operationRow.rowConfig.justify">
+	    <template v-if='operationRow.align == "top"'>
+                <Row class='form-row form-operation-row' type="flex" :align='operationRow.rowConfig.align' :justify="operationRow.rowConfig.justify">
                     <Col>
                         <template v-for='button in form.operationRow.fixedButtons'>
                             <Button :type="button.type" :icon="button.icon" @click='fn(button.clickFn)'>
@@ -41,13 +43,13 @@
                 </Row>
             </template>
 
-            <template v-if='form.operationRow.align == "bottom"'>
+            <template v-if='operationRow.align == "bottom"'>
                 
 		<div style='border:0;height:20px;margin-bottom:15px;border-bottom:1px solid #e9eaec;'>
 			<!--split-->
 		</div>
 
-		<Row class='form-row form-operation-row' type="flex" :align='form.operationRow.rowConfig.align' :justify="form.operationRow.rowConfig.justify">
+		<Row class='form-row form-operation-row' type="flex" :align='operationRow.rowConfig.align' :justify="operationRow.rowConfig.justify">
                     <Col>
                         <template v-for='button in form.operationRow.fixedButtons'>
                             <Button :type="button.type" :icon="button.icon" @click='fn(button.clickFn)'>
@@ -64,14 +66,28 @@
                     </Col>
                 </Row>
             </template>
+
+            <div class="form-hidden" style='display:none;'>
+		    <template v-for='(column,index) in hideColumns'>
+			 <div :id='column.columnId' >
+			    <FormItem :prop='column.columnConfig.key || column.columnId' v-if='column.columnConfig.showLabel' :label="column.columnConfig.label">
+				<FormDynamicRender v-if='column.model' :formModel='formData' v-model='formData[column.columnConfig.key || column.columnId]' :model='column.model' />
+			    </FormItem>
+			    <template v-else>
+				<FormDynamicRender v-if='column.model' :model='column.model' />
+			    </template>
+			 </div>
+		    </template>
+	    </div>
+
         </div>
     </Form>
 </template>
 
 <script>
-
+     import Vue from 'vue'
      export default {
-        name  : 'FormComponent',
+        name  : 'FormDisplay',
 	props : {
 	    formId  : [String,Number],
 	    stateId : [String,Number],
@@ -80,7 +96,10 @@
 	components : {
 	},
 	created() {
-	    // è§£æžformå¯¹è±¡ï¼ŒåŠ è½½æ‰€æœ‰çš„formitemåˆ—ï¼Œå–å‡ºkeyï¼Œæ·»åŠ åˆ°this.formData
+            // Í¨¹ýformId²éÑ¯form¶ÔÏó
+            this.loadForm();
+
+	    // ½âÎöform¶ÔÏó£¬¼ÓÔØËùÓÐµÄformitemÁÐ£¬È¡³ökey£¬Ìí¼Óµ½this.formData
             if(this.form.rows) {
                 // this.formData = {};
 	        this.form.rows.forEach(row => {
@@ -99,6 +118,9 @@
 	},
 	data () {
 		 return {
+		    form : {},
+		    state : {},
+		    hideColumns : [],
 		    formData: {}
 		 }  
 	},
@@ -106,15 +128,121 @@
 	   console.log('============= formId = ' + this.formId);
 	},
 	computed : {
-	   rows() {
-	       return this.$store.state.form.form.rows;
+	   labelWidth() {
+              if(!this.form.common_cfg) {
+	          return 100;
+	      }
+	      return this.form.common_cfg.labelWidth;
 	   },
-	   form() {
-	       // æ­£å¸¸æ“ä½œ é€šè¿‡formIdæŸ¥è¯¢åŽå°,è¿™é‡Œå†™æ­»form
-	      return this.$store.state.form.form;
+	   layout() {
+	      if(!this.form.common_cfg) {
+	          return 'default';
+	      }
+	      return this.form.common_cfg.layout;
+	   },
+	   operationRow() {
+	      if(!this.form.operationRow) {
+	          return {
+		      rowConfig : {}
+		  };
+	      }
+	      return this.form.operationRow;
 	   }
 	},
 	methods : {
+           loadForm() {
+		this.$store.commit('getForm', {
+		    id: this.formId,
+		    callback: formData =>{
+			let form = JSON.parse(formData.form_source);
+			this.form = form;
+			// ¼ÓÔØ×´Ì¬
+			this.loadState();
+			// this.loadData();
+		    }
+		});
+	   },
+	   loadState() {
+	        if(!this.stateId) {
+		    return ;
+		}
+	        this.$store.commit('getState', {
+		    id: this.stateId,
+		    callback: stateData =>{
+                        let stateSource = stateData.state_source;
+			if(stateSource) {
+			     let formState = JSON.parse(stateSource);
+			     this.state = formState;
+			     this.applyState();
+                        }
+		    }
+		});
+	   },
+	   applyState() {
+		let form = this.form;
+		let formState = this.state;
+		Vue.set(form, 'state', formState.global);
+
+		let initStateOption = {
+		    render: true,
+		    hide: false,
+		    readonly: false
+		};
+                
+		form.rows.forEach(row =>{
+		    row.columns.forEach(column => {
+			let columnState = formState.elementsState[column.columnId];
+			Vue.set(column, 'state', columnState || {...initStateOption
+			});
+		    });
+		    let rowState = formState.elementsState[row.rowId];
+		    Vue.set(row, 'state', rowState || {...initStateOption
+		    });
+		});
+
+		// state ºÏ²¢
+                form.rows.forEach(row =>{
+		    row.columns.forEach(column => {
+			let columnState = formState.elementsState[column.columnId];
+			Vue.set(column, 'state', columnState || {...initStateOption});
+		    });
+		    let rowState = formState.elementsState[row.rowId];
+		    Vue.set(row, 'state', rowState || {...initStateOption});
+		});
+
+                let hideColumns = [];
+                let rows = form.rows.filter( row => {
+		      let renderRow = row.state.render;
+		      let hideRow = row.state.hide;
+		      let readonlyRow = row.state.readonlyRow;
+		      if(renderRow) {
+		          let columns = row.columns.filter(column => {
+                                let filter = column.state.render && !column.state.hide;
+				if(hideRow) {
+				     hideColumns.push(column);
+				} else {
+				     if(column.state.render) {
+				        if(column.state.hide) {
+				            hideColumns.push(column);
+				        } else {
+					    if(readonlyRow || column.state.readonly) {
+					        Vue.set(column.model.props, 'readonly', true);
+					    }
+					}
+				     }
+				}
+				return !hideRow && filter ;
+			    });
+			  row.columns = columns;
+			  if(row.columns.length == 0) {
+			      hideRow = true;
+			  }
+		      } 
+		      return renderRow && !hideRow;
+		});
+                form.rows = rows;
+                this.hideColumns = hideColumns;
+	   },
 	   getSpan(columnCount) {
 	       let gridCount = 24;
                if(gridCount % columnCount == 0) {
@@ -140,11 +268,16 @@
 	   },
 	   submitForm() {
 	       console.log('========== submitForm call');
-	       console.log('========== this.formData ï¼š  ' + JSON.stringify(this.formData));
+	       console.log('========== this.formData £º  ' + JSON.stringify(this.formData));
 	   },
 	   resetForm() {
 	       this.$refs.form.resetFields();
 	   }
+	},
+	watch : {
+	    'formId'(id) {
+	        this.loadForm();
+	    }
 	}
 }
 

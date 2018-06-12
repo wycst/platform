@@ -6,6 +6,10 @@
     min-height: 33px;
 }
 
+.form-layout-default,.form-layout-grid,.form-layout-column {
+    overflow: hidden;
+}
+
 .form-layout-default .form-item-row {
     margin: 0px;
     padding: 5px;
@@ -29,7 +33,7 @@
 }
 
 .form-layout-default .operation-row-selected {
-    background: #ebf7ff;
+   // background: #ebf7ff;
 }
 
 .sortable-ghost {
@@ -72,7 +76,7 @@
 }
 
 .form-layout-grid .operation-row-selected {
-    background: #ebf7ff;
+  //  background: #ebf7ff;
 }
 
 </style> <style> .placeholder {
@@ -107,7 +111,7 @@
 
         <Form :model="formData" :label-width='form.common_cfg.labelWidth'>
 
-            <div :class='{"form-layout-default" : form.common_cfg.layout == "default","form-layout-grid" : form.common_cfg.layout == "grid"}'>
+            <div :class='{"form-layout-default" : form.common_cfg.layout == "default","form-layout-grid" : form.common_cfg.layout == "grid","form-layout-column" : form.common_cfg.layout == "column"}'>
 
                 <template v-if='form.operationRow.align == "top"'>
                     <Row class='form-row form-operation-row' :class="{'operation-row-selected' : form.operationRow.selected}" type="flex" :justify="form.operationRow.rowConfig.justify" @click.native='clickOperationRow' @dblclick.native='dblClickOperationRow'>

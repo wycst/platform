@@ -1,5 +1,5 @@
 <template>
-    <Select :value="currentValue" :disabled='disabled' :size='size' :filterable='filterable' transfer @on-change='change'>
+    <Select :value="currentValue" :disabled='disabled || readonly' :size='size' :filterable='filterable' transfer @on-change='change'>
         <Option v-for="option in optionList" :value="option.key" :key="option.key">{{ option.label }}</Option>
     </Select>
 </template>
@@ -13,6 +13,7 @@
 	extends : Select,
         mixins : [FormBasic],
 	props : {
+	   readonly : Boolean,
            mode : String,
            url  : String,
            params : String,

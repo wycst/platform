@@ -2,6 +2,7 @@
         <Input 
 	   :id='elementId'
 	   :size='size'
+	   :readonly='readonly'
 	   :value='currentValue' 
 	   :type="type" 
            :placeholder="placeholder"

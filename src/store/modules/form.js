@@ -272,34 +272,50 @@ const form = {
 			});
 		},
 		loadState(state,id) {
-		    axios.get(state.contextPath + state.url.loadState,{
-				params: {
-					'id' : id,
-					 t : new Date().getTime()
+			this.commit('getState',{
+			    id : id,
+			    callback : stateData => {
+					if(stateData) {
+						let stateSource = stateData.state_source;
+						if(stateSource) {
+							let formState = JSON.parse(stateSource);
+							Object.assign(state.formState,formState);
+						} else {
+							alert('数据异常!');
+						}
+						this.commit('mergeState');
+					}
 				}
-			}).then(res => {
-				state.loading = false;
-				// res.data
-				let stateData = res.data;
-				let stateSource = stateData.state_source;
-				if(stateSource) {
-					let formState = JSON.parse(stateSource);
-                    Object.assign(state.formState,formState);
-				} else {
-				    alert('数据异常!');
-				}
-				this.commit('mergeState');
-		    }).catch(function(error) {
-                console.trace(error);
-				alert(error);
 			});
-
 		},
 		loadForm(state,id) {
             state.loading = true;
-		    axios.get(state.contextPath + state.url.queryById,{
+            this.commit('getForm',{
+			     id : id,
+			     callback(formData){
+					state.currentFormId = id;
+                    if(formData) {
+						state.form_uid = formData.uid;
+						state.stateList.splice(0,state.stateList.length);
+						if(formData.stateList) {
+							state.stateList.push(...formData.stateList);
+						}
+						let form = JSON.parse(formData.form_source);
+						state.design.form = form;
+						state.form = form;
+						// show statelist
+						state.showStateList = true;
+					}
+				 }
+			});
+		},
+		reloadForm(state) {
+			this.commit('loadForm',state.currentFormId);
+		},
+        getForm(state,options) {
+            axios.get(state.contextPath + state.url.queryById,{
 				params: {
-					'id' : id,
+					'id' : options.id,
 					 t : new Date().getTime()
 				}
 			}).then(res => {
@@ -308,28 +324,34 @@ const form = {
 				    alert('form[id='+id+']加载失败!');
 					return ;
 				}
-				state.currentFormId = id;
-                let formData = res.data;
-				if(formData) {
-					state.form_uid = formData.uid;
-					state.stateList.splice(0,state.stateList.length);
-					if(formData.stateList) {
-						state.stateList.push(...formData.stateList);
-					}
-                    let form = JSON.parse(formData.form_source);
-				    state.design.form = form;
-					state.form = form;
-					// show statelist
-					state.showStateList = true;
+				if(options.callback && typeof(options.callback) == 'function') {
+				    options.callback(res.data);
 				}
 		    }).catch(function(error) {
                 console.trace(error);
 				alert(error);
 			});
-
 		},
-		reloadForm(state) {
-			this.commit('loadForm',state.currentFormId);
+		getState(state,options) {
+            axios.get(state.contextPath + state.url.loadState,{
+				params: {
+					'id' : options.id,
+					 t : new Date().getTime()
+				}
+			}).then(res => {
+				state.loading = false;
+				if(res.data == 'error') {
+				    alert('state[id='+id+']加载失败!');
+					return ;
+				}
+				// res.data
+				if(options.callback && typeof(options.callback) == 'function') {
+				    options.callback(res.data);
+				}
+		    }).catch(function(error) {
+                console.trace(error);
+				alert(error);
+			});
 		},
 		loadFormData (state,vm) {
 			state.loading = true;

@@ -33,6 +33,7 @@ const form = {
 			   loadState        : '/form/loadState',
 			   saveState        : '/form/saveState',
 			   queryById        : '/form/loadForm',
+			   submitForm       : '/form/submitForm',
 			   disableForm  : '/form/disable',
 			   publishForm  : '/form/publish',
 			   deleteForm   : '/form/delete'
@@ -350,6 +351,25 @@ const form = {
 				}
 		    }).catch(function(error) {
                 console.trace(error);
+				alert(error);
+			});
+		},
+	    submitForm(state,options) {
+            let postParams = {
+			    form_uid : options.form_uid,
+				model_source : options.model_source
+			};
+            if(options.id) {
+			    postParams.id = options.id;
+			}
+			axios.post(state.contextPath + state.url.submitForm,qs.stringify(postParams)).then(res => {
+				alert('提交成功！')
+				// res.data
+				if(options.callback && typeof(options.callback) == 'function') {
+				    options.callback(res.data);
+				}
+		    }).catch(function(error) {
+			    console.trace(error);
 				alert(error);
 			});
 		},

@@ -36,20 +36,7 @@ export default {
          data : [Object,Array]
      },
      created() {
-         if(this.dataType == 'object') {
-	      // 生成2列 一列为key，一列为value
-              this.keys.push(...['key','value']);
-              for(let key in data) {
-	          this.rows.push({
-		     key : key,
-		     value : data[key]
-		  });
-	      }
-	 } else {
-	      this.keys.push(...this.props);
-              this.rows.push(...this.data);
-	 }
-
+         this.initJson();
      },
      data() {
          return {
@@ -59,6 +46,23 @@ export default {
 	 }
      },
      methods : {
+         initJson() {
+                this.keys.length = 0;
+                this.rows.length = 0;
+		if (this.dataType == 'object') {
+		    // 生成2列 一列为key，一列为value
+		    this.keys.push(...['key', 'value']);
+		    for (let key in data) {
+			this.rows.push({
+			    key: key,
+			    value: data[key]
+			});
+		    }
+		} else {
+		    this.keys.push(...this.props);
+		    this.rows.push(...this.data);
+		}
+	 },
          add() {
 	    this.rows.push({});
 	 },
@@ -82,6 +86,9 @@ export default {
 	 }
      },
      watch : {
+         data() {
+	    this.initJson();
+	 }
      }
 
 }

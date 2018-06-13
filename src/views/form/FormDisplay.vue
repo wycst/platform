@@ -33,12 +33,12 @@
                     <template v-for='(column,j) in row.columns'>
                         <Col :id='column.columnId' :span="getSpan(row.columns.length)" :style='{height: row.rowConfig.rowHeight + "px",width:getWidthPercent(row.columns.length) + "%"}'>
                             <FormItem :prop='column.columnConfig.key || column.columnId' v-if='column.columnConfig.showLabel' :label="column.columnConfig.label">
-				<FormDynamicRender v-if='column.model' :formModel='formData' v-model='formData[column.columnConfig.key || column.columnId]' :model='column.model' />
+				<FormDynamicRender v-if='column.model' :formModel='formData' v-model='formData[column.columnId].value' :model='column.model' />
 			    </FormItem>
                             <template v-else>
                                 <FormDynamicRender v-if='column.model' :model='column.model' />
                             </template>
-                            <div v-if='column.state.readonly' class='item-mask'></div>
+                            <div v-if='column.state.readonly' class='item-mask' :style="{width:'calc(100% - ' + (labelWidth + 12) + 'px)'}"></div>
                         </Col>
                     </template>
                 </Row>
@@ -72,7 +72,7 @@
 		    <template v-for='(column,index) in hideColumns'>
 			 <div :id='column.columnId' >
 			    <FormItem :prop='column.columnConfig.key || column.columnId' v-if='column.columnConfig.showLabel' :label="column.columnConfig.label">
-				<FormDynamicRender v-if='column.model' :formModel='formData' v-model='formData[column.columnConfig.key || column.columnId]' :model='column.model' />
+				<FormDynamicRender v-if='column.model' :formModel='formData' v-model='formData[column.columnId].value' :model='column.model' />
 			    </FormItem>
 			    <template v-else>
 				<FormDynamicRender v-if='column.model' :model='column.model' />
@@ -97,28 +97,12 @@
 	components : {
 	},
 	created() {
-            // ͨ��formId��ѯform����
+            // load form
             this.loadForm();
-
-	    // ����form���󣬼������е�formitem�У�ȡ��key�����ӵ�this.formData
-            if(this.form.rows) {
-                // this.formData = {};
-	        this.form.rows.forEach(row => {
-		    if(row.type == 'formitem') {
-		         row.columns.forEach(column => {
-			     let key = column.columnConfig.key;
-			     if(key) {
-			        this.$set(this.formData,key,null);
-			     } else {
-			        this.$set(this.formData,column.columnId,null);
-			     }
-			 });
-		    }
-		});
-	    }
 	},
 	data () {
 		 return {
+		    form_uid : null,
 		    form : {},
 		    state : {},
 		    hideColumns : [],
@@ -157,9 +141,10 @@
 		    callback: formData =>{
 			let form = JSON.parse(formData.form_source);
 			this.form = form;
-			// ����״̬
+			// load state
 			this.loadState();
-			// this.loadData();
+			// load data
+			this.loadModel();
 		    }
 		});
 	   },
@@ -170,6 +155,7 @@
 	        this.$store.commit('getState', {
 		    id: this.stateId,
 		    callback: stateData =>{
+		        this.form_uid = stateData.uid;
                         let stateSource = stateData.state_source;
 			if(stateSource) {
 			     let formState = JSON.parse(stateSource);
@@ -201,7 +187,7 @@
 		    });
 		});
 
-		// state �ϲ�
+		// state
                 form.rows.forEach(row =>{
 		    row.columns.forEach(column => {
 			let columnState = formState.elementsState[column.columnId];
@@ -244,6 +230,26 @@
                 form.rows = rows;
                 this.hideColumns = hideColumns;
 	   },
+	   loadModel() {
+
+		if (this.form.rows) {
+		    // this.formData = {};
+		    this.form.rows.forEach(row =>{
+			if (row.type == 'formitem') {
+			    row.columns.forEach(column =>{
+				let key = column.columnConfig.key;
+				let label = column.columnConfig.label;
+				let columnValue = {
+				    label: label,
+				    key: key,
+				    value: null
+				};
+				this.$set(this.formData, column.columnId, columnValue);
+			    });
+			}
+		    });
+		}
+	   },
 	   getSpan(columnCount) {
 	       let gridCount = 24;
                if(gridCount % columnCount == 0) {
@@ -264,12 +270,21 @@
 	       }
 	   },
 	   saveForm() {
-	       console.log('========== saveForm call');
-               this.formData.name = new Date().getTime();
+	       if(!this.id) {
+	           this.submitForm();
+	       }
 	   },
 	   submitForm() {
 	       console.log('========== submitForm call');
-	       console.log('========== this.formData ��  ' + JSON.stringify(this.formData));
+	       console.log('========== this.formData ' + JSON.stringify(this.formData));
+	       let model_source = JSON.stringify(this.formData,0,4)
+	       this.$store.commit('submitForm',{
+	           form_uid : this.form_uid,
+                   model_source : model_source,
+		   callback : res => {
+		       console.log(res);
+		   }
+	       });
 	   },
 	   resetForm() {
 	       this.$refs.form.resetFields();

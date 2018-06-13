@@ -11,6 +11,11 @@ var formSql = {
 		deleteById : 'delete from form_state_info where id = ? ',
 		update : 'update form_state_info set name = ? ,code = ? ,description = ? ,state_source = ? ,update_time = ?,effect_text = ? where id = ? ',
         queryList : 'select id,name from form_state_info where form_uid = ? order by order_index '
+	},
+	model : {
+	    select : 'select * from form_model_info where id = ?',
+		insert : 'insert into form_model_info(uid,form_uid,model_source,version,submitter,submit_time) values(?,?,?,?,?,?)',
+	    update : 'update form_model_info set model_source = ?,submitter = ?,submit_time = ? where id = ?'
 	}
 }
 module.exports = formSql;

@@ -99,7 +99,7 @@ export default {
 	        this.$refs.formTree.reload();
 	    },
             afterTreeLoad(tree) {
-                let formId = this.$route.query.id;
+                let formId = this.$route.query.id || this.$store.state.form.currentFormId;
                 tree.select(formId);
             },
             selectForm(node) {

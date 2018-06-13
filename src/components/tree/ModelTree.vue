@@ -98,6 +98,9 @@ export default {
 	   this.load();
 	},
         select(select) {
+           if(!select) {
+	       return ;
+	   }
 	   this.clearSelectedNodes();
 	   if(typeof select == 'object') {
                this.selectedNodes.push(select);

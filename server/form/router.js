@@ -294,7 +294,6 @@ router.post('/saveState', (req, res) => {
     			  id
     		]);
 	console.log(' sql : ' + sql);
-
     pool.getConnection(function(err,conn) {
         if(err) {
             console.log(' get connect error ');
@@ -312,6 +311,54 @@ router.post('/saveState', (req, res) => {
         }
     });
 
+
+});
+
+
+// 提交表单
+router.post('/submitForm', (req, res) => {
+    var params = req.body;
+	var id = params.id;
+    var sql = id ? $sql.model.update : $sql.model.insert;
+	var sqlParams = [];
+	console.log(' sql : ' + sql);
+    if(id) {
+	   // update
+	   sqlParams.push(...[
+    		   	  params.model_source,
+                  'admin',
+                  new Date(),
+    			  id
+    		]);
+	} else {
+	   // insert 
+	   sqlParams.push(...[
+    		   	  'model_' + uuid.v1(),
+                  params.form_uid,
+		          params.model_source,
+                  new Date().getTime(),
+		          'admin',
+                  new Date()
+    		]);
+	}
+
+    pool.getConnection(function(err,conn) {
+        if(err) {
+            console.log(' get connect error ');
+        } else {
+            conn.query(sql, sqlParams, function(err, result) {
+                if (err) {
+                    console.log(err);
+					return ;
+                }
+				console.log(result[0]);
+                if (result) {
+                    jsonWrite(res, result[0]);
+                }
+                conn.release();
+            });
+        }
+    });
 
 });
 

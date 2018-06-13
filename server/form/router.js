@@ -69,7 +69,7 @@ router.post('/saveForm', (req, res) => {
 	var id = params.id;
     var sql = id ? $sql.form.update:$sql.form.insert;
 	var sqlParams = [];
-	
+
     if(id) {
   	    sqlParams.push(...[
     		   	  params.name,
@@ -142,7 +142,7 @@ router.get('/loadForm', (req, res) => {
       var params = req.query;
 	  var id = params.id;
       var sql = $sql.form.select;
-      
+
 	  if(!id) {
 		  console.log(' id is null ');
 		  jsonWrite(res, "error");
@@ -247,6 +247,37 @@ router.get('/loadState', (req, res) => {
 
 });
 
+// 加载状态接口
+router.get('/loadModel', (req, res) => {
+    var params = req.query;
+  	var id = params.id;
+    var sql = $sql.model.select;
+  	var sqlParams = [];
+
+    console.log(' sql : ' + sql);
+	  console.log(' params : ' + [id]);
+
+    pool.getConnection(function(err,conn) {
+        if(err) {
+            console.log(' get connect error ');
+        } else {
+            conn.query(sql, [id], function(err, result) {
+                if (err) {
+                    console.log(err);
+					          return ;
+                }
+                if (result) {
+                    jsonWrite(res, result[0]);
+                }
+                conn.release();
+            });
+        }
+    });
+
+
+});
+
+
 // 删除状态接口
 router.get('/delState', (req, res) => {
     var params = req.query;
@@ -255,7 +286,7 @@ router.get('/delState', (req, res) => {
 	var sqlParams = [];
 
     console.log(' sql : ' + sql);
-	console.log(' params : ' + [id]);
+	  console.log(' params : ' + [id]);
 
     pool.getConnection(function(err,conn) {
         if(err) {
@@ -315,6 +346,7 @@ router.post('/saveState', (req, res) => {
 });
 
 
+
 // 提交表单
 router.post('/submitForm', (req, res) => {
     var params = req.body;
@@ -331,7 +363,7 @@ router.post('/submitForm', (req, res) => {
     			  id
     		]);
 	} else {
-	   // insert 
+	   // insert
 	   sqlParams.push(...[
     		   	  'model_' + uuid.v1(),
                   params.form_uid,
@@ -349,11 +381,10 @@ router.post('/submitForm', (req, res) => {
             conn.query(sql, sqlParams, function(err, result) {
                 if (err) {
                     console.log(err);
-					return ;
+					          return ;
                 }
-				console.log(result[0]);
                 if (result) {
-                    jsonWrite(res, result[0]);
+                    jsonWrite(res, result);
                 }
                 conn.release();
             });

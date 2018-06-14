@@ -72,7 +72,7 @@ class FormDesign {
 	};
     addFormItemRow() {
 		let rows = this.form.rows;
-		let rowId = this.uuid();
+		let rowId = 'row_' + this.uuid();
 
     let initState = {
        render : true,
@@ -101,7 +101,7 @@ class FormDesign {
 		}
 
         for(let columnIndex = 0 ; columnIndex < initColCountPerRow ; columnIndex++) {
-		    let columnId = this.uuid();
+		    let columnId = 'column_' + this.uuid();
 			let column = {
 				 columnId : columnId,
 				 state : {...initState},

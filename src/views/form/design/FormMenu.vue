@@ -173,6 +173,7 @@ export default {
 		    this.$store.commit('loadState', name);
 		}
                 this.designOption.type = 'state';
+		this.$layouts.formdesign.eastCollapse(false);
             },
 	    delState() {
 	        this.$store.commit('delState');

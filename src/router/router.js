@@ -119,7 +119,7 @@ export const appRouter = [
 const oneLevelRouter = [
         { 
 			path: '/formdesign',
-			name: 'form-design', 
+			name: 'formDesign', 
 			component: () => import('@/views/form/FormDesign.vue')
 		},
 	    {
@@ -134,17 +134,17 @@ const oneLevelRouter = [
 		},
 		{ 
 			path: '/borderlayout',
-			name: 'border-layout', 
+			name: 'borderLayout', 
 			component: () => import('@/views/layout/BorderLayoutDemo.vue')
 		},
 	    { 
 			path: '/formedit',
-			name: 'form-edit', 
+			name: 'formEdit', 
 			component: () => import('@/views/form/FormEdit.vue')
 		},
 		{ 
 			path: '/formpreview',
-			name: 'form-preview', 
+			name: 'formPreview', 
 			component: () => import('@/views/form/FormPreview.vue')
 		},
 		{ 

@@ -227,7 +227,15 @@ const form = {
 			}
 
 			queryParams.id = formId;
-            queryParams.formSource = JSON.stringify(state.form,0,4);
+
+			let cloneForm = JSON.parse(JSON.stringify(state.form));
+            cloneForm.rows.forEach(row => {
+			    row.columns.forEach(column => {
+				    column.selected = false;
+				});
+                row.selected = false;
+			});
+            queryParams.formSource = JSON.stringify(cloneForm,0,4);
 
             axios.post(state.contextPath + state.url.save,
 				 qs.stringify(queryParams)).then(res => {

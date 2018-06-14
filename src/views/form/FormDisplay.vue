@@ -19,6 +19,7 @@
 
 .form-layout-grid .form-item-row {
     margin: 0px;
+    padding-top: 1px;
     overflow: hidden;
     border: 1px #ccc solid;
     border-top: 0px;
@@ -105,11 +106,11 @@
             <Row :id='row.rowId' v-if='row.columns[0]' class='form-row form-item-row' :class='{"form-item-row-first" : index == 0}' :gutter='row.rowConfig.gutter' :key="row.rowId">
                 <template v-for='(column,j) in row.columns'>
                     <Col :id='column.columnId' :span="getSpan(row.columns.length)" :style='{height: row.rowConfig.rowHeight + "px",width:getWidthPercent(row.columns.length) + "%"}'>
-                        <FormItem :prop='column.columnConfig.key || column.columnId' v-if='column.columnConfig.showLabel' :label="column.columnConfig.label">
+                        <FormItem :prop='column.columnId' v-if='column.columnConfig.showLabel' :label="column.columnConfig.label">
                             <FormDynamicRender v-if='column.model' :formModel='formData' v-model='formData[column.columnId].value' :model='column.model' />
                         </FormItem>
                         <template v-else>
-                            <FormDynamicRender v-if='column.model' :model='column.model' />
+                            <FormDynamicRender v-if='column.model' :formModel='formData' v-model='formData[column.columnId].value' :model='column.model' />
                         </template>
                         <div v-if='column.state.readonly' class='item-mask' :style="{width:'calc(100% - ' + (labelWidth + 12) + 'px)'}"></div>
                     </Col>
@@ -144,7 +145,7 @@
         <div class="form-hidden" style='display:none;'>
             <template v-for='(column,index) in hideColumns'>
                 <div :id='column.columnId'>
-                    <FormItem :prop='column.columnConfig.key || column.columnId' v-if='column.columnConfig.showLabel' :label="column.columnConfig.label">
+                    <FormItem v-if='column.columnConfig.showLabel' :label="column.columnConfig.label">
                         <FormDynamicRender v-if='column.model' :formModel='formData' v-model='formData[column.columnId].value' :model='column.model' />
                     </FormItem>
                     <template v-else>
@@ -180,6 +181,7 @@ export default {
             form: {},
             state: {},
             hideColumns: [],
+	    initialFormData : {},
             formData: {}
         }
     },
@@ -289,7 +291,7 @@ export default {
                                         hideColumns.push(column);
                                     } else {
                                         if (readonlyRow || column.state.readonly) {
-                                            // Vue.set(column.model.props, 'readonly', true);
+                                           Vue.set(column.model.props, 'readonly', true);
                                         }
                                     }
                                 }
@@ -326,18 +328,19 @@ export default {
                         }
                     });
                 }
-
+		this.initialFormData = JSON.parse(JSON.stringify(this.formData));
                 if(this.modelId) {
                      this.$store.commit('loadModel',{
                           id : this.modelId,
                           callback : model => {
                               if(model && model.model_source) {
-                                   this.formData = JSON.parse(model.model_source);
-                              }
+                                   let formData = JSON.parse(model.model_source);
+				   Object.assign(this.formData,formData);
+                                   this.initialFormData = JSON.parse(JSON.stringify(this.formData));
+			      }
                           }
                      });
                 } else {
-
                 }
             },
             getSpan(columnCount) {
@@ -365,34 +368,42 @@ export default {
                 }
             },
             submitForm() {
-
                 let model_source = JSON.stringify(this.formData, 0, 4);
-                console.log('========== this.formData ' + model_source);
-
+                // console.log('========== this.formData ' + model_source);
                 let options = {
                     form_uid: this.form_uid,
                     model_source: model_source,
                     callback: result => {
-                        if(result.insertId) {
-                            this.modelId = result.insertId;
+		        let query = Object.assign({},this.$router.currentRoute.query);
+			if(result.insertId) {
+                            query.modelId = result.insertId;
                         }
+			// reflush
+                        this.$router.push({
+				    path: this.$router.currentRoute.path,
+				    query: query
+				});
                     }
                 };
-
                 if(this.modelId) {
                     options.id = this.modelId;
                 }
-
                 this.$store.commit('submitForm', options);
             },
             resetForm() {
-                this.$refs.form.resetFields();
+		this.formData = JSON.parse(JSON.stringify(this.initialFormData));
             }
     },
     watch: {
         'formId' (id) {
             this.loadForm();
-        }
+        },
+	'stateId' () {
+	    this.loadForm();
+	},
+	'modelId' () {
+	    this.loadForm();
+	}
     }
 }
 

@@ -22,7 +22,7 @@ var pool = mysql.createPool(models.mysql);
 
 
 
-var jsonWrite = function(res, ret) {
+var outputJson = function(res, ret) {
     if(!ret) {
         res.json('');
     } else {
@@ -51,7 +51,7 @@ router.get('/formTree', (req, res) => {
                         console.log(e);
                     }
                     list.push(...forms);
-                    jsonWrite(res, list);
+                    outputJson(res, list);
                     conn.release();
                 });
             });
@@ -85,7 +85,7 @@ router.post('/saveForm', (req, res) => {
                 params.code,
                 params.description,
                 params.version,
-                uuid.v1(),
+                'form_' + uuid.v1(),
     			new Date(),
     			0,
                 params.formSource,
@@ -95,12 +95,12 @@ router.post('/saveForm', (req, res) => {
     pool.getConnection(function(err,conn) {
         if(err) {
             console.log(' get connect error ');
-			jsonWrite(res, "error");
+			outputJson(res, "error");
         } else {
             conn.query(sql, sqlParams, function(err, result) {
                 if (err) {
                     console.log(err);
-                    jsonWrite(res, "error");
+                    outputJson(res, err);
                 } else {
                     var currentState = params.currentState;
 					console.log(' save currentState ' + (currentState != null));
@@ -119,14 +119,14 @@ router.post('/saveForm', (req, res) => {
                          conn.query(stateSql, stateParams, function(err, result) {
 							if (err) {
 								console.log(err);
-								jsonWrite(res, "error");
+								outputJson(res, err);
 							} else {
-								jsonWrite(res, "success");
+								outputJson(res, "success");
 							}
 							conn.release();
 						});
 					} else {
-						jsonWrite(res, "success");
+						outputJson(res, "success");
 					    conn.release();
 					}
 				}
@@ -145,36 +145,36 @@ router.get('/loadForm', (req, res) => {
 
 	  if(!id) {
 		  console.log(' id is null ');
-		  jsonWrite(res, "error");
+		  outputJson(res, "error");
 		  return ;
 	  }
 
       pool.getConnection(function(err,conn) {
           if(err) {
               console.log(' get connect error ');
-			  jsonWrite(res, "error");
+			  outputJson(res, "error");
           } else {
               conn.query(sql, [id], function(err, result) {
                   if (err) {
                       console.log(err);
-					  jsonWrite(res, "error");
+					  outputJson(res, "error");
 					  return ;
                   }
 				  var form = result[0];
                   if(!form) {
 				      console.log(' form[id=' + id + '] is not exist');
-					  jsonWrite(res, "error");
+					  outputJson(res, "error");
 					  return ;
 				  }
 
                   conn.query($sql.state.queryList,[form.uid],function(e, stateList) {
 					  if (e) {
 						  console.log(e);
-						  jsonWrite(res, "error");
+						  outputJson(res, "error");
 						  return ;
 					  }
 					  form.stateList = stateList;
-                      jsonWrite(res, form);
+                      outputJson(res, form);
 					  conn.release();
 				  });
 
@@ -192,7 +192,7 @@ router.post('/addState', (req, res) => {
 			params.name,
 			params.code,
 			params.description,
-			uuid.v1(),
+			'state_' + uuid.v1(),
 			new Date(),
 			params.form_uid,
             params.state_source,
@@ -207,7 +207,7 @@ router.post('/addState', (req, res) => {
                     console.log(err);
                 }
                 if (result) {
-                    jsonWrite(res, result);
+                    outputJson(res, result);
                 }
                 conn.release();
             });
@@ -237,7 +237,7 @@ router.get('/loadState', (req, res) => {
 					return ;
                 }
                 if (result) {
-                    jsonWrite(res, result[0]);
+                    outputJson(res, result[0]);
                 }
                 conn.release();
             });
@@ -255,7 +255,7 @@ router.get('/loadModel', (req, res) => {
   	var sqlParams = [];
 
     console.log(' sql : ' + sql);
-	  console.log(' params : ' + [id]);
+	console.log(' params : ' + [id]);
 
     pool.getConnection(function(err,conn) {
         if(err) {
@@ -267,7 +267,7 @@ router.get('/loadModel', (req, res) => {
 					          return ;
                 }
                 if (result) {
-                    jsonWrite(res, result[0]);
+                    outputJson(res, result[0]);
                 }
                 conn.release();
             });
@@ -298,7 +298,7 @@ router.get('/delState', (req, res) => {
 					return ;
                 }
                 if (result) {
-                    jsonWrite(res, "success");
+                    outputJson(res, "success");
                 }
                 conn.release();
             });
@@ -335,7 +335,7 @@ router.post('/saveState', (req, res) => {
 					return ;
                 }
                 if (result) {
-                    jsonWrite(res, result[0]);
+                    outputJson(res, result[0]);
                 }
                 conn.release();
             });
@@ -344,8 +344,6 @@ router.post('/saveState', (req, res) => {
 
 
 });
-
-
 
 // 提交表单
 router.post('/submitForm', (req, res) => {
@@ -384,7 +382,7 @@ router.post('/submitForm', (req, res) => {
 					          return ;
                 }
                 if (result) {
-                    jsonWrite(res, result);
+                    outputJson(res, result);
                 }
                 conn.release();
             });

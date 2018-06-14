@@ -46,6 +46,7 @@
 
 .form-layout-grid .form-item-row {
     margin: 0px;
+    padding-top: 1px;
     overflow: hidden;
     border: 1px #ccc dotted;
     border-top: 0px;

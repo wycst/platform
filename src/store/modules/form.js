@@ -34,6 +34,9 @@ const form = {
 			   saveState        : '/form/saveState',
 			   queryById        : '/form/loadForm',
 			   submitForm       : '/form/submitForm',
+
+         loadModel         : '/form/loadModel',
+
 			   disableForm  : '/form/disable',
 			   publishForm  : '/form/publish',
 			   deleteForm   : '/form/delete'
@@ -200,7 +203,7 @@ const form = {
     			    alert(error);
     			});
 			}
-            
+
 
 		},
         saveForm(state,option) {
@@ -351,6 +354,27 @@ const form = {
 				}
 		    }).catch(function(error) {
                 console.trace(error);
+				alert(error);
+			});
+		},
+		loadModel(state,options) {
+						axios.get(state.contextPath + state.url.loadModel,{
+				params: {
+					'id' : options.id,
+					 t : new Date().getTime()
+				}
+			}).then(res => {
+				state.loading = false;
+				if(res.data == 'error') {
+						alert('Model[id='+id+']加载失败!');
+					return ;
+				}
+				// res.data
+				if(options.callback && typeof(options.callback) == 'function') {
+						options.callback(res.data);
+				}
+				}).catch(function(error) {
+								console.trace(error);
 				alert(error);
 			});
 		},

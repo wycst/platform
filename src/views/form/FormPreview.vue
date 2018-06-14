@@ -6,9 +6,9 @@
 	     </p>
 	     <p slot="extra">
 		 <Button type="ghost" icon="checkmark" @click="backEdit">返回编辑</Button>
-	     </p>   
+	     </p>
 	     <div :style="{height:(clientHeight - 20 )+'px',width :'100%',background : 'white',overflow : 'auto',border : '0px solid gray'}">
-		 <FormDisplay :formId='$route.query.formId' :stateId='$route.query.stateId'></FormDisplay>
+		 						<FormDisplay :formId='$route.query.formId' :stateId='$route.query.stateId' :modelId='$route.query.modelId'></FormDisplay>
 	     </div>
 	</Card>
 </template>
@@ -25,7 +25,7 @@ export default {
 	data () {
 		 return {
 		    offsetTop : 0
-		 }  
+		 }
 	},
 	mounted () {
 	   this.offsetTop = this.$refs.card.$el.getBoundingClientRect().top ;

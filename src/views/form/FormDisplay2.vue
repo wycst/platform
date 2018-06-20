@@ -1,10 +1,8 @@
 <style scoped>
-
 .form-item-row {
     margin: 0;
     padding: 0;
 }
-
 .form-layout-default .form-item-row {
     margin: 2px;
     padding: 2px;
@@ -12,11 +10,9 @@
     padding-left: 20px;
     overflow: hidden;
 }
-
 .form-layout-grid .ivu-select-disabled .ivu-select-input[disabled] {
     color: red !important;
 }
-
 .form-layout-grid .form-item-row {
     margin: 0px;
     padding-top: 1px;
@@ -25,34 +21,27 @@
     border-top: 0px;
     background-color: #fafafa;
 }
-
 .form-layout-grid .form-item-row-first {
     border-top: 1px #ccc solid;
 }
-
 .form-layout-grid .form-item-row .ivu-col {
     transition: all .2s;
     padding-left: 10px;
     padding-right: 10px;
     border-left: 1px #ccc solid;
 }
-
 .form-layout-grid .ivu-col:first-child {
     border-left: 0px;
 }
-
 .form-layout-grid .ivu-form-item {
     margin-bottom: 0px;
 }
-
 .form-layout-grid .form-item-selected {
     background: #ebf7ff;
 }
-
 .form-layout-grid .operation-row-selected {
     background: #ebf7ff;
 }
-
 .item-mask {
     z-index: 100;
     background: #FFF;
@@ -64,17 +53,15 @@
     top: 0;
     width: 100%;
 }
-
 </style> <style> .form-layout-grid .ivu-col .ivu-input,
 .form-layout-grid .ivu-col .ivu-select-selection {
     border-radius: 0px;
 }
-
 </style>
 
 <template>
 
-<Form ref='form' :model='model' :label-width='labelWidth'>
+<Form ref='form' :model='formData' :label-width='labelWidth'>
 
     <div :class='{"form-layout-default" : layout == "default","form-layout-grid" : layout == "grid"}'>
 
@@ -107,10 +94,10 @@
                 <template v-for='(column,j) in row.columns'>
                     <Col :id='column.columnId' :span="getSpan(row.columns.length)" :style='{height: row.rowConfig.rowHeight + "px",width:getWidthPercent(row.columns.length) + "%"}'>
                         <FormItem :prop='column.columnId' v-if='column.columnConfig.showLabel' :label="column.columnConfig.label">
-                            <FormDynamicRender v-if='column.model' :formModel='model' v-model='model[column.columnId].value' :model='column.model' />
+                            <FormDynamicRender v-if='column.model' :formModel='formData' v-model='formData[column.columnId].value' :model='column.model' />
                         </FormItem>
                         <template v-else>
-                            <FormDynamicRender v-if='column.model' :formModel='model' v-model='model[column.columnId].value' :model='column.model' />
+                            <FormDynamicRender v-if='column.model' :formModel='formData' v-model='formData[column.columnId].value' :model='column.model' />
                         </template>
                         <div v-if='column.state.readonly' class='item-mask' :style="{width:'calc(100% - ' + (labelWidth + 12) + 'px)'}"></div>
                     </Col>
@@ -146,7 +133,7 @@
             <template v-for='(column,index) in hideColumns'>
                 <div :id='column.columnId'>
                     <FormItem v-if='column.columnConfig.showLabel' :label="column.columnConfig.label">
-                        <FormDynamicRender v-if='column.model' :formModel='model' v-model='model[column.columnId].value' :model='column.model' />
+                        <FormDynamicRender v-if='column.model' :formModel='formData' v-model='formData[column.columnId].value' :model='column.model' />
                     </FormItem>
                     <template v-else>
                         <FormDynamicRender v-if='column.model' :model='column.model' />
@@ -161,7 +148,6 @@
 </template>
 
 <script>
-
 import Vue from 'vue'
 export default {
     name: 'FormDisplay',
@@ -178,8 +164,8 @@ export default {
     data() {
         return {
             form_uid: null,
-            form : {},
-            state : {},
+            form: {},
+            state: {},
             hideColumns: [],
 	    initialFormData : {},
             formData: {}
@@ -208,49 +194,48 @@ export default {
                     };
                 }
                 return this.form.operationRow;
-            },
-	    model() {
-	        return this.formData;
-	    }
+            }
     },
     methods: {
         loadForm() {
-                this.$store.commit('loadFullform', {
-                    formId: this.formId,
-		    stateId : this.stateId,
-		    modelId : this.modelId,
-                    callback: formModel => {
-                        let form = JSON.parse(formModel.form.form_source);
-			if(formModel.state) {
-		           this.state = JSON.parse(formModel.state.state_source);
-			}
-			this.applyState(form);
-			
-			let model = null;
-			if(formModel.model) {
-			    this.formData = JSON.parse(formModel.model.model_source);
-			}
-			//this.applyModel(form,model);
-			this.form = form;
-
-			setTimeout(()=> {
-			     this.formData = JSON.parse(formModel.model.model_source);
-			},200);
+                this.$store.commit('getForm', {
+                    id: this.formId,
+                    callback: formData => {
+                        let form = JSON.parse(formData.form_source);
+                        this.form = form;
+                        // load state
+                        this.loadState();
+                        // load data
+                        this.loadModel();
                     }
                 });
             },
-            applyState(form) {
-
+            loadState() {
+                if (!this.stateId) {
+                    return;
+                }
+                this.$store.commit('getState', {
+                    id: this.stateId,
+                    callback: stateData => {
+                        this.form_uid = stateData.uid;
+                        let stateSource = stateData.state_source;
+                        if (stateSource) {
+                            let formState = JSON.parse(stateSource);
+                            this.state = formState;
+                            this.applyState();
+                        }
+                    }
+                });
+            },
+            applyState() {
+                let form = this.form;
                 let formState = this.state;
                 Vue.set(form, 'state', formState.global);
-
                 let initStateOption = {
                     render: true,
                     hide: false,
                     readonly: false
                 };
-                
-		// 初始化state
                 form.rows.forEach(row => {
                     row.columns.forEach(column => {
                         let columnState = formState.elementsState[column.columnId];
@@ -261,9 +246,17 @@ export default {
                     Vue.set(row, 'state', rowState || {...initStateOption
                     });
                 });
-
-                // hide字段集合记录为hideColumns，
-		// show的字段集合覆盖原来的rows属性
+                // state
+                form.rows.forEach(row => {
+                    row.columns.forEach(column => {
+                        let columnState = formState.elementsState[column.columnId];
+                        Vue.set(column, 'state', columnState || {...initStateOption
+                        });
+                    });
+                    let rowState = formState.elementsState[row.rowId];
+                    Vue.set(row, 'state', rowState || {...initStateOption
+                    });
+                });
                 let hideColumns = [];
                 let rows = form.rows.filter(row => {
                     let renderRow = row.state.render;
@@ -297,11 +290,39 @@ export default {
                 form.rows = rows;
                 this.hideColumns = hideColumns;
             },
-            applyModel(form,model) {
-                Object.assign(this.formData,model);
-		alert(this.formData['bf1f0670-635d-11e8-bdcf-fda43863c5c0'].value);
-                this.formData['bf1f0670-635d-11e8-bdcf-fda43863c5c0'].value = '333';
+            loadModel() {
+                // init
+                if (this.form.rows) {
+                    // this.formData = {};
+                    this.form.rows.forEach(row => {
+                        if (row.type == 'formitem') {
+                            row.columns.forEach(column => {
+                                let key = column.columnConfig.key;
+                                let label = column.columnConfig.label;
+                                let columnValue = {
+                                    label: label,
+                                    key: key,
+                                    value: null
+                                };
+                                this.$set(this.formData, column.columnId, columnValue);
+                            });
+                        }
+                    });
+                }
 		this.initialFormData = JSON.parse(JSON.stringify(this.formData));
+                if(this.modelId) {
+                     this.$store.commit('loadModel',{
+                          id : this.modelId,
+                          callback : model => {
+                              if(model && model.model_source) {
+                                   let formData = JSON.parse(model.model_source);
+				   Object.assign(this.formData,formData);
+                                   this.initialFormData = JSON.parse(JSON.stringify(this.formData));
+			      }
+                          }
+                     });
+                } else {
+                }
             },
             getSpan(columnCount) {
                 let gridCount = 24;
@@ -328,14 +349,9 @@ export default {
                 }
             },
             submitForm() {
-
                 let model_source = JSON.stringify(this.formData, 0, 4);
-                console.log('========== this.formData ' + model_source);
-                
-                alert(this.formData['bf1f0670-635d-11e8-bdcf-fda43863c5c0'].value);
-                this.formData['bf1f0670-635d-11e8-bdcf-fda43863c5c0'].value = '444';
-
-		let options = {
+                // console.log('========== this.formData ' + model_source);
+                let options = {
                     form_uid: this.form_uid,
                     model_source: model_source,
                     callback: result => {
@@ -353,7 +369,7 @@ export default {
                 if(this.modelId) {
                     options.id = this.modelId;
                 }
-                // this.$store.commit('submitForm', options);
+                this.$store.commit('submitForm', options);
             },
             resetForm() {
 		this.formData = JSON.parse(JSON.stringify(this.initialFormData));
@@ -371,5 +387,4 @@ export default {
 	}
     }
 }
-
 </script>

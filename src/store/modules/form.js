@@ -33,6 +33,7 @@ const form = {
 			   loadState        : '/form/loadState',
 			   saveState        : '/form/saveState',
 			   queryById        : '/form/loadForm',
+			   loadFullform     : '/form/loadFullform',
 			   submitForm       : '/form/submitForm',
 
          loadModel         : '/form/loadModel',
@@ -383,6 +384,35 @@ const form = {
 				}
 				}).catch(function(error) {
 								console.trace(error);
+				alert(error);
+			});
+		},
+		loadFullform(state,options) {
+            state.loading = true;
+            let params = {
+			    formId : options.formId
+			};
+			if(options.stateId) {
+			    params.stateId = options.stateId;
+			}
+			if(options.modelId) {
+			    params.modelId = options.modelId;
+			}
+			params.t = new Date().getTime();
+
+            axios.get(state.contextPath + state.url.loadFullform,{
+				params: params
+			}).then(res => {
+				state.loading = false;
+				if(res.data == 'error') {
+				    alert('form[id='+id+']加载失败!');
+					return ;
+				}
+				if(options.callback && typeof(options.callback) == 'function') {
+				    options.callback(res.data);
+				}
+		    }).catch(function(error) {
+                console.trace(error);
 				alert(error);
 			});
 		},

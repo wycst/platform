@@ -64,7 +64,7 @@ export default {
         }
     },
     render(h) {
-		console.log(JSON.stringify(this.model.props));
+		// console.log(JSON.stringify(this.model.props));
         if (this.timestamp && this.component) {
             return h(this.component);
         }

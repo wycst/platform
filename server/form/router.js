@@ -274,8 +274,9 @@ router.get('/loadModel', (req, res) => {
         }
     });
 
-
 });
+
+
 
 
 // 删除状态接口
@@ -286,7 +287,7 @@ router.get('/delState', (req, res) => {
 	var sqlParams = [];
 
     console.log(' sql : ' + sql);
-	  console.log(' params : ' + [id]);
+	console.log(' params : ' + [id]);
 
     pool.getConnection(function(err,conn) {
         if(err) {
@@ -343,6 +344,69 @@ router.post('/saveState', (req, res) => {
     });
 
 
+});
+
+
+// 完整的表单[表单+状态+数据模型]
+router.get('/loadFullform', (req, res) => {
+      
+	  var fullForm = {};
+	  var params = req.query;
+	  var formId = params.formId;
+	  var stateId = params.stateId;
+	  var modelId = params.modelId;
+      
+	  if(!formId) {
+		  console.log(' formId is null ');
+		  outputJson(res, "error");
+		  return ;
+	  }
+      
+	  var sqls = [$sql.form.select];
+	  var sqlParas = [formId];
+
+	  var stateDataIndex = -1;
+      if(stateId) {
+	      sqls.push($sql.state.select);
+		  sqlParas.push(stateId);
+		  stateDataIndex = sqls.length - 1;
+	  }
+
+      var modelDataIndex = -1;
+	  if(modelId) {
+	      sqls.push($sql.model.select);
+		  sqlParas.push(modelId);
+		  modelDataIndex = sqls.length - 1;
+	  }
+
+      // 执行多条sql需要设置multipleStatements
+      pool.getConnection(function(err,conn) {
+          if(err) {
+              console.log(' get connect error ');
+			  outputJson(res, "error");
+          } else {
+              conn.query(sqls.join(";"), sqlParas, function(err, results) {
+                  if (err) {
+                      console.log(err);
+					  outputJson(res, "error");
+					  return ;
+                  }
+                  if(sqls.length > 1) {
+				      fullForm.form = results[0][0];
+				  } else {
+				      fullForm.form = results[0];
+				  }
+				  if(stateDataIndex > -1) {
+				      fullForm.state = results[stateDataIndex][0];
+				  }
+				  if(modelDataIndex > -1) {
+					  fullForm.model = results[modelDataIndex][0];
+				  }
+                  outputJson(res, fullForm);
+				  conn.release();
+              });
+          }
+      });
 });
 
 // 提交表单

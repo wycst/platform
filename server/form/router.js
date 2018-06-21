@@ -396,6 +396,13 @@ router.get('/loadFullform', (req, res) => {
 				  } else {
 				      fullForm.form = results[0];
 				  }
+                  if(!fullForm.form) {
+				      outputJson(res, "form[id=" + formId + '] is not exist !');
+					  console.log("form[id=]" + formId + 'is not exist !');
+					  conn.release();
+					  return ;
+				  }
+
 				  if(stateDataIndex > -1) {
 				      fullForm.state = results[stateDataIndex][0];
 				  }

@@ -179,7 +179,7 @@ export default {
         return {
             form_uid: null,
             form : {},
-            state : {},
+            state : null,
             hideColumns: [],
 	    initialFormData : {},
             formData: {}
@@ -220,45 +220,53 @@ export default {
 		    stateId : this.stateId,
 		    modelId : this.modelId,
                     callback: formModel => {
+
+                        if(!formModel.form) {
+			    alert("form[id=" + this.formId + '] is not exist !');
+			    return ;
+			}
+			this.form_uid = formModel.form.uid;
                         let form = JSON.parse(formModel.form.form_source);
+			// init model
+                        this.initModel(form);
+
 			if(formModel.state) {
 		           this.state = JSON.parse(formModel.state.state_source);
 			}
 			this.applyState(form);
-			
-			let model = null;
-			if(formModel.model) {
-			    this.formData = JSON.parse(formModel.model.model_source);
-			}
-			//this.applyModel(form,model);
-			this.form = form;
 
-			setTimeout(()=> {
-			     this.formData = JSON.parse(formModel.model.model_source);
-			},200);
+                        // alert(btoa);
+			if(formModel.model) {
+			    // timer 下一个帧执行
+			    setTimeout(()=> {
+				Object.assign(this.formData,JSON.parse(formModel.model.model_source));
+			        this.initialFormData = JSON.parse(formModel.model.model_source);
+			    },0);
+			}
+			this.form = form;
                     }
                 });
             },
             applyState(form) {
-
-                let formState = this.state;
-                Vue.set(form, 'state', formState.global);
 
                 let initStateOption = {
                     render: true,
                     hide: false,
                     readonly: false
                 };
-                
+
+		let formState = this.state;
+                Vue.set(form, 'state', (formState && formState.global) || {...initStateOption});
+
 		// 初始化state
                 form.rows.forEach(row => {
                     row.columns.forEach(column => {
-                        let columnState = formState.elementsState[column.columnId];
+                        let columnState = formState && formState.elementsState[column.columnId];
                         Vue.set(column, 'state', columnState || {...initStateOption
                         });
                     });
-                    let rowState = formState.elementsState[row.rowId];
-                    Vue.set(row, 'state', rowState || {...initStateOption
+                    let rowState = formState && formState.elementsState[row.rowId];
+		    Vue.set(row, 'state', rowState || {...initStateOption
                     });
                 });
 
@@ -297,10 +305,27 @@ export default {
                 form.rows = rows;
                 this.hideColumns = hideColumns;
             },
+	    initModel(form) {
+		if (form.rows) {
+		    form.rows.forEach(row => {
+			if (row.type == 'formitem') {
+			    row.columns.forEach(column => {
+				let key = column.columnConfig.key;
+				let label = column.columnConfig.label;
+				let columnValue = {
+				    label: label,
+				    key: key,
+				    value: null
+				};
+				this.$set(this.formData, column.columnId, columnValue);
+			    });
+			}
+		    });
+		}
+		this.initialFormData = JSON.parse(JSON.stringify(this.formData));
+	    },
             applyModel(form,model) {
                 Object.assign(this.formData,model);
-		alert(this.formData['bf1f0670-635d-11e8-bdcf-fda43863c5c0'].value);
-                this.formData['bf1f0670-635d-11e8-bdcf-fda43863c5c0'].value = '333';
 		this.initialFormData = JSON.parse(JSON.stringify(this.formData));
             },
             getSpan(columnCount) {
@@ -331,10 +356,6 @@ export default {
 
                 let model_source = JSON.stringify(this.formData, 0, 4);
                 console.log('========== this.formData ' + model_source);
-                
-                alert(this.formData['bf1f0670-635d-11e8-bdcf-fda43863c5c0'].value);
-                this.formData['bf1f0670-635d-11e8-bdcf-fda43863c5c0'].value = '444';
-
 		let options = {
                     form_uid: this.form_uid,
                     model_source: model_source,
@@ -353,7 +374,7 @@ export default {
                 if(this.modelId) {
                     options.id = this.modelId;
                 }
-                // this.$store.commit('submitForm', options);
+                this.$store.commit('submitForm', options);
             },
             resetForm() {
 		this.formData = JSON.parse(JSON.stringify(this.initialFormData));

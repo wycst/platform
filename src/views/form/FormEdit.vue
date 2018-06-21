@@ -246,6 +246,7 @@ export default {
     data() {
         return {
             offsetTop: 0,
+	    historyForms : [],
             formData: {
             }
         }
@@ -361,6 +362,17 @@ export default {
             });
 
         }
+    },
+    watch : {
+        'form' : {
+	    handler(v) {
+	        if(v) {
+		    //this.historyForms.push(JSON.parse(JSON.stringify(v)));
+		}
+	        //console.log(this.historyForms);
+	    },
+	    deep : true
+	}
     }
 }
 

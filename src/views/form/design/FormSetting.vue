@@ -132,6 +132,12 @@ export default {
                             }, {
                                 key: 'FormNumberInput',
                                 label: 'FormNumberInput'
+                            },{
+                                key: 'FormDatePicker',
+                                label: 'FormDatePicker'
+                            },{
+                                key: 'FormSwitch',
+                                label: 'FormSwitch'
                             }]
                         }
                     },
@@ -332,7 +338,7 @@ export default {
                     if (oldColumn) {
                         oldColumn.selected = false;
                     }
-		    if(this.designOption.type == "form") {
+		    if(true || this.designOption.type == "form") {
 		        if(column) {
 			    this.setColumnValues(column);
 			}
@@ -342,7 +348,7 @@ export default {
         },
         selectRow: {
 	    handler(row) {
-		if(this.designOption.type == "form") {
+		if(true || this.designOption.type == "form") {
 		    if (row) {
 			this.setRowValues(row);
 		    }
@@ -353,7 +359,7 @@ export default {
         },
         selectButton: {
             handler(button) {
-                if(this.designOption.type == "form") {
+                if(true || this.designOption.type == "form") {
 		    if (button) {
 			this.setButton(button);
 		    }

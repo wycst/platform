@@ -18,6 +18,7 @@
 	     </template>
 	</FormItem>
 
+        <!--数字输入框配置-->
         <template v-if="componentName == 'FormNumberInput'">
 	     <FormItem label="自适应宽度" prop="fitWidth">
 		    <i-switch v-model="componentProps.fitWidth">
@@ -27,7 +28,7 @@
 	     </FormItem>
 	</template>
 
-
+        <!--普通文本输入框配置-->
         <template v-if="componentName == 'Input' || componentName == 'FormInput'">
 	        <FormItem label="占位文本" prop="placeholder">
 		    <Input v-model="componentProps.placeholder"/>
@@ -49,14 +50,43 @@
 		    </Select>
 		</FormItem>
 	</template>
+
+        <!--日期组件配置-->
+        <template v-if="componentName == 'FormDatePicker' || componentName == 'DatePicker'">
+	        <FormItem label="是否可输入" prop="editable">
+		    <i-switch v-model="componentProps.editable">
+			<span slot="open">是</span>
+			<span slot="close">否</span>
+		    </i-switch>
+		</FormItem>
+		<FormItem label="格式" prop="format">
+		    <Select v-model="componentProps.format" transfer placeholder="">
+			<Option value="yyyy-MM-dd">yyyy-MM-dd</Option>
+			<Option value="yyyy-MM-dd HH:mm:ss">yyyy-MM-dd HH:mm:ss</Option>
+                        <Option value="yyyy-MM">yyyy-MM</Option>
+			<Option value="yyyy/MM/dd">yyyy/MM/dd</Option>
+			<Option value="yyyy/MM/dd HH:mm:ss">yyyy/MM/dd HH:mm:ss</Option>
+                        <Option value="yyyy/MM">yyyy/MM</Option>
+			<Option value="yyyy">yyyy</Option>
+		    </Select>
+		</FormItem>
+		<FormItem label="类型" prop="type">
+		    <Select v-model="componentProps.type" transfer placeholder="">
+			<Option value="date">date</Option>
+			<Option value="datetime">datetime</Option>
+		    </Select>
+		</FormItem>
+	</template>
+
+        <!--下拉选配置-->
 	<template v-if="componentName == 'ComboSelect' || componentName == 'Select' || componentName == 'FormComboSelect'">
 	       
 	       
 	        <FormItem label="是否可搜索" prop="filterable">
-		    <i-switch v-model="componentProps.filterable">
+		    <ISwitch v-model="componentProps.filterable">
 			<span slot="open">是</span>
 			<span slot="close">否</span>
-		    </i-switch>
+		    </ISwitch>
 		</FormItem>
 		<FormItem label="数据加载模式">
 		    <RadioGroup v-model="componentProps.mode">
@@ -114,7 +144,9 @@
            showResult() {
 	       console.log(JSON.stringify(this.componentProps));
 	   }
-        }
+        },
+	watch : {
+	}
     }
 </script>
 <style>

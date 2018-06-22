@@ -65,11 +65,13 @@
     width: 100%;
 }
 
-</style> <style> .form-layout-grid .ivu-col .ivu-input,
+</style> 
+<style>
+.form-layout-grid .ivu-col .ivu-input,
+.form-layout-grid .ivu-col .ivu-input-number,
 .form-layout-grid .ivu-col .ivu-select-selection {
     border-radius: 0px;
 }
-
 </style>
 
 <template>

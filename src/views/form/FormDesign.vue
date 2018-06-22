@@ -76,10 +76,10 @@ export default {
 	       let me = this;
 	       this.$store.commit('saveForm',{
 		   callback() {
-		       // 重新加载tree或state
+		       // 重新加载tree
 		       me.$eventTarget.$emit('on-refresh-formtree');
-		       // 重新加载form
-		       me.$store.commit("reloadForm");
+		       // 是否重新加载form & stateList ？
+		       // me.$store.commit("reloadForm");
 		   }
 	       });
 	   },

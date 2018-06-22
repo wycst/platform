@@ -87,7 +87,7 @@ export default {
     },
     data() {
         return {
-	    expand : false
+	    expand : true
 	}
     },
     computed : {

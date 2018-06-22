@@ -80,7 +80,9 @@
   //  background: #ebf7ff;
 }
 
-</style> <style> .placeholder {
+</style> 
+<style> 
+.placeholder {
     border: dotted lightblue 1px;
     //background: lightblue;
 }
@@ -98,6 +100,7 @@
 }
 
 .form-layout-grid .ivu-col .ivu-input,
+.form-layout-grid .ivu-col .ivu-input-number,
 .form-layout-grid .ivu-col .ivu-select-selection {
     border-radius: 0px;
 }
@@ -364,14 +367,9 @@ export default {
         }
     },
     watch : {
-        'form' : {
-	    handler(v) {
-	        if(v) {
-		    //this.historyForms.push(JSON.parse(JSON.stringify(v)));
-		}
-	        //console.log(this.historyForms);
-	    },
-	    deep : true
+        'form'(form){
+	    // clear selections
+	    this.$store.commit("clearSelection");
 	}
     }
 }

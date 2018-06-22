@@ -153,6 +153,15 @@ const form = {
         setSelection(state,option) {
             Object.assign(state.selection,option);
 	    },
+        clearSelection(state) {
+            Object.assign(state.selection,{
+				selectStateId : null,
+				selectType : null,
+				selectRow  : null,
+				selectButton  : null,
+				selectColumn : null
+			});
+		},
 		addState(state) {
 			let params = Object.assign({},state.newState);
             if(!params.name) {
@@ -244,6 +253,10 @@ const form = {
 					  if(option.callback) {
 					      option.callback.call(this,1);
 					  }
+                      if(stateId) {
+						  // 刷新stateList
+					      this.commit('refreshStateList',formId);
+					  }
     		     }).catch(function(error) {
     			      alert(error);
     			 });
@@ -299,6 +312,21 @@ const form = {
 						this.commit('mergeState');
 					}
 				}
+			});
+		},
+		refreshStateList(state,id) {
+			state.loading = true;
+            this.commit('getForm',{
+			     id : id,
+			     callback(formData){
+                    if(formData) {
+						state.stateList.splice(0,state.stateList.length);
+						if(formData.stateList) {
+							state.stateList.push(...formData.stateList);
+						}
+						state.showStateList = true;
+					}
+				 }
 			});
 		},
 		loadForm(state,id) {

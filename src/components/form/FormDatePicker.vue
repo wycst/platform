@@ -34,9 +34,6 @@ export default
 	       this.$emit('on-change',value,type);
                this.$emit('input',value);
 	   }
-       },
-       watch : {
-       
        }
 }
 </script>

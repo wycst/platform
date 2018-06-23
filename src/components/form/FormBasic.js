@@ -3,7 +3,7 @@ export default {
     props : {
 		formModel:Object,
 	    formItemKey : String,
-		value : [String,Number]
+		value : [String,Number,Date,Boolean]
 	},
 	methods : {
 	    setCurrentValue(val) {

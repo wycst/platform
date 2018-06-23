@@ -13,6 +13,15 @@
              <template v-if="componentName == 'InputNumber' || componentName == 'FormNumberInput'">
 	          <InputNumber v-model="componentProps.value"/>
 	     </template>
+	     <template v-else-if="componentName == 'FormSwitch'">
+		  <i-switch v-model="componentProps.value"/>
+			<span slot="open">开</span>
+			<span slot="close">关</span>
+		  </i-switch>
+	     </template>
+	     <template v-else-if="componentName == 'FormDatePicker'">
+		  <DatePicker transfer v-model="componentProps.value"/></DatePicker>
+	     </template>
              <template v-else>
 	          <Input v-model="componentProps.value"/>
 	     </template>
@@ -80,13 +89,11 @@
 
         <!--下拉选配置-->
 	<template v-if="componentName == 'ComboSelect' || componentName == 'Select' || componentName == 'FormComboSelect'">
-	       
-	       
 	        <FormItem label="是否可搜索" prop="filterable">
-		    <ISwitch v-model="componentProps.filterable">
+		    <i-switch v-model="componentProps.filterable">
 			<span slot="open">是</span>
 			<span slot="close">否</span>
-		    </ISwitch>
+		    </i-switch>
 		</FormItem>
 		<FormItem label="数据加载模式">
 		    <RadioGroup v-model="componentProps.mode">
@@ -110,11 +117,17 @@
 			</FormItem>
 		</template>
 		<JsonStore v-if='componentProps.mode == "local"' dataType='Array' :props='["key","label"]' :data='componentProps.data || (componentProps.data = [])'></JsonStore>
-
 	</template>
 	
-
-
+        <!--开关类组件配置-->
+        <template v-if="componentName == 'FormSwitch'">
+	        <FormItem label="label-开" prop="openLabel">
+		    <Input v-model="componentProps.openLabel"/>
+		</FormItem>
+		<FormItem label="label-关" prop="closeLabel">
+		    <Input v-model="componentProps.closeLabel"/>
+		</FormItem>
+	</template>
 
     </Form>
 </template> 

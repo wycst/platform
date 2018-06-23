@@ -1,7 +1,13 @@
 <template>
-    <Select :value="currentValue" :disabled='disabled' :size='size' :filterable='filterable' transfer @on-change='change'>
-        <Option v-for="option in optionList" :value="option.key" :key="option.key">{{ option.label }}</Option>
-    </Select>
+    <div tabindex="0" class="ivu-select ivu-select-single ivu-select-default">
+	     <div class="ivu-select-selection">
+		<input type="hidden">  
+		<span class="ivu-select-placeholder">«Î—°‘Ò</span>
+		<span class="ivu-select-selected-value" style="display: none;"></span> 
+		<i class="ivu-icon ivu-icon-ios-close ivu-select-arrow" style="display: block;"></i>
+		<i class="ivu-icon ivu-icon-arrow-down-b ivu-select-arrow"></i>
+	    </div> 
+    </div>
 </template>
 <script>
     import {Select} from 'iview'

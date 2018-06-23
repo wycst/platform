@@ -104,7 +104,7 @@
 
         </template>
 
-        <template v-for='(row,index) in form.rows'>
+        <template v-for='(row,index) in displayRows'>
             <Row :id='row.rowId' v-if='row.columns[0]' class='form-row form-item-row' :class='{"form-item-row-first" : index == 0}' :gutter='row.rowConfig.gutter' :key="row.rowId">
                 <template v-for='(column,j) in row.columns'>
                     <Col :id='column.columnId' :span="getSpan(row.columns.length)" :style='{height: row.rowConfig.rowHeight + "px",width:getWidthPercent(row.columns.length) + "%"}'>
@@ -182,6 +182,7 @@ export default {
             form_uid: null,
             form : {},
             state : null,
+	    displayRows:[],
             hideColumns: [],
 	    initialFormData : {},
             formData: {}
@@ -216,8 +217,15 @@ export default {
 	    }
     },
     methods: {
+        initForm() {
+	    this.form = {};
+	    this.state = null;
+	    this.hideColumns.splice(0,this.hideColumns.length);
+            this.displayRows.splice(0,this.displayRows.length);
+	},
         loadForm() {
-                this.$store.commit('loadFullform', {
+	    this.initForm();
+            this.$store.commit('loadFullform', {
                     formId: this.formId,
 		    stateId : this.stateId,
 		    modelId : this.modelId,
@@ -228,7 +236,9 @@ export default {
 			    return ;
 			}
 			this.form_uid = formModel.form.uid;
-                        let form = JSON.parse(formModel.form.form_source);
+                        
+			let form = JSON.parse(formModel.form.form_source);
+
 			// init model
                         this.initModel(form);
 
@@ -241,8 +251,7 @@ export default {
 			if(formModel.model) {
 			    // timer 下一个帧执行
 			    setTimeout(()=> {
-				Object.assign(this.formData,JSON.parse(formModel.model.model_source));
-			        this.initialFormData = JSON.parse(formModel.model.model_source);
+			        this.applyModel(JSON.parse(formModel.model.model_source));
 			    },0);
 			}
 			this.form = form;
@@ -304,8 +313,9 @@ export default {
                     }
                     return renderRow && !hideRow;
                 });
-                form.rows = rows;
-                this.hideColumns = hideColumns;
+
+		this.displayRows.push(...rows);
+                this.hideColumns.push(...hideColumns);
             },
 	    initModel(form) {
 		if (form.rows) {
@@ -326,8 +336,16 @@ export default {
 		}
 		this.initialFormData = JSON.parse(JSON.stringify(this.formData));
 	    },
-            applyModel(form,model) {
-                Object.assign(this.formData,model);
+            applyModel(model) {
+	        // only update value
+                // Object.assign(this.formData,model);
+                for(let id in model) {
+		    if(!this.formData[id]) {
+		        this.formData[id] = model[id];
+		    } else {
+		        this.formData[id].value = model[id].value;
+		    }
+		}
 		this.initialFormData = JSON.parse(JSON.stringify(this.formData));
             },
             getSpan(columnCount) {

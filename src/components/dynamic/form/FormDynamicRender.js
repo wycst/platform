@@ -9,7 +9,7 @@ export default {
     props: {
 		/* 拓展表单属性 */
 		/* v-model */
-        value: [String, Number],
+        value: [String, Number,Date,Boolean],
 		/* 表单数据对象*/
 		formModel : Object,
 		/* 远程类数据接口是否自动加载*/
@@ -40,7 +40,7 @@ export default {
             // v-model default value
 			let defaultValue = props.value;
             if(defaultValue) {
-			    this.$emit('input', defaultValue);
+			   // this.$emit('input', defaultValue);
 			}
 
             let children = model.children || [];

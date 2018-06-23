@@ -1,5 +1,8 @@
 <template>
-   <i-switch :value='currentValue' :size="size" @on-change='change'>
+   <i-switch 
+       :value='currentValue' 
+       :size="size" 
+       @on-change='change'>
 	<span slot="open">{{openLabel}}</span>
 	<span slot="close">{{closeLabel}}</span>
    </i-switch>
@@ -32,6 +35,12 @@ export default
        computed : {
        },
        methods : {
+           setCurrentValue(val) {
+	        val = !val ? false : true;
+		if(this.currentValue != val) {
+		    this.currentValue = val;
+		}
+	   },
 	   change(value,type) {
 	       this.currentValue = value;
 	       this.$emit('on-change',value,type);
@@ -39,7 +48,6 @@ export default
 	   }
        },
        watch : {
-       
        }
 }
 </script>

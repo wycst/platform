@@ -20,7 +20,7 @@
 .form-layout-grid .form-item-row {
     margin: 0px;
     padding-top: 1px;
-    overflow: hidden;
+   // overflow: hidden;//如果设置为hidden，下拉组件只能设置transfer,暂时屏蔽
     border: 1px #ccc solid;
     border-top: 0px;
     background-color: #fafafa;

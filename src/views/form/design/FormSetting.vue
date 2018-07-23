@@ -129,6 +129,9 @@ export default {
                             }, {
                                 key: 'FormComboSelect',
                                 label: 'FormComboSelect'
+                            },{
+                                key: 'FormComboTree',
+                                label: 'FormComboTree'
                             }, {
                                 key: 'FormNumberInput',
                                 label: 'FormNumberInput'

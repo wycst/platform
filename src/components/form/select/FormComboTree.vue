@@ -1,13 +1,53 @@
 <template>
-    <div tabindex="0" class="ivu-select ivu-select-single ivu-select-default">
-	     <div class="ivu-select-selection">
-		<input type="hidden">  
-		<span class="ivu-select-placeholder">ÇëÑ¡Ôñ</span>
-		<span class="ivu-select-selected-value" style="display: none;"></span> 
-		<i class="ivu-icon ivu-icon-ios-close ivu-select-arrow" style="display: block;"></i>
-		<i class="ivu-icon ivu-icon-arrow-down-b ivu-select-arrow"></i>
-	    </div> 
+  
+<div tabindex="0" class="ivu-select ivu-select-single ivu-select-default">
+    <div class="ivu-select-selection">
+        <input type="hidden">
+        <span class="ivu-select-placeholder">
+            è¯·é€‰æ‹©
+        </span>
+        <span class="ivu-select-selected-value" style="display: none;">
+        </span>
+        <!---->
+        <i class="ivu-icon ivu-icon-ios-close ivu-select-arrow" style="display: none;">
+        </i>
+        <i class="ivu-icon ivu-icon-arrow-down-b ivu-select-arrow">
+        </i>
     </div>
+    <!---->
+    <div class="ivu-select-dropdown" style="width: 200px; transform-origin: center bottom 0px; position: absolute; will-change: top, left; top: -174px; left: 20px;"
+	x-placement="top">
+	    <ul class="ivu-select-not-found" style="display: none;">
+		<li>
+		    æ— åŒ¹é…æ•°æ®
+		</li>
+	    </ul>
+	    <ul class="ivu-select-dropdown-list">
+		<li class="ivu-select-item">
+		    New York
+		</li>
+		<li class="ivu-select-item">
+		    London
+		</li>
+		<li class="ivu-select-item">
+		    Sydney
+		</li>
+		<li class="ivu-select-item">
+		    Ottawa
+		</li>
+		<li class="ivu-select-item">
+		    Paris
+		</li>
+		<li class="ivu-select-item">
+		    Canberra
+		</li>
+	    </ul>
+	    <ul class="ivu-select-loading" style="display: none;">
+		åŠ è½½ä¸­
+	    </ul>
+	</div>
+</div>
+
 </template>
 <script>
     import {Select} from 'iview'
@@ -42,7 +82,7 @@
            if(this.mode == 'remote') {
 	      // if remote get optionList by ajax
           
-              // ½âÎöthis.paramsµÄ±äÁ¿
+              // è§£æthis.paramsçš„å˜é‡
               let params = this.params;
 	      if(params) {
 	          params = StringUtil.template(this.params,this.formModel);

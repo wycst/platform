@@ -31,6 +31,7 @@ import FormComponent from '@/components/form/FormComponent'
 import FormInput from '@/components/form/FormInput'
 import FormNumberInput from '@/components/form/FormNumberInput'
 import FormComboSelect from '@/components/form/select/FormComboSelect'
+import FormComboTree from '@/components/form/select/FormComboTree'
 import FormDatePicker from '@/components/form/FormDatePicker'
 import FormSwitch from '@/components/form/FormSwitch'
 
@@ -39,6 +40,7 @@ Vue.component('FormComponent',FormComponent)
 Vue.component('FormInput',FormInput)
 Vue.component('FormNumberInput',FormNumberInput)
 Vue.component('FormComboSelect',FormComboSelect)
+Vue.component('FormComboTree',FormComboTree)
 Vue.component('FormDatePicker',FormDatePicker)
 Vue.component('FormSwitch',FormSwitch)
 

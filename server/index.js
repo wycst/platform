@@ -1,3 +1,12 @@
+/*
+skywalking 监控
+先安装 npm install skywalking-nodejs --save
+require('skywalking-nodejs').start({
+    applicationCode: 'platform',
+    directServers: 'localhost:11800'
+});
+*/
+
 // node 后端服务器
 const formRouter = require('./form/router');
 const fs = require('fs');
